@@ -51,16 +51,10 @@ body {
     font-family: 'Google Sans', sans-serif;
 }
 
-/* .publication-authors {
-    font-family: 'Google Sans', sans-serif;
-} */
 .publication-authors {
-  font-family: 'Google Sans', sans-serif;
-  display: inline-flex;      /* keeps it inline with headings if needed */
-  flex-wrap: wrap;
-  gap: 0.8rem;              /* <— controls the space between authors */
-  align-items: baseline;     /* nicer alignment with <sup> */
-}
+    font-family: 'Google Sans', sans-serif;
+} 
+
 .publication-venue {
     color: #555;
     width: fit-content;
