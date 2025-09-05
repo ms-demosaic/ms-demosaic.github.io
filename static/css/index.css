@@ -110,6 +110,16 @@ body {
 .publication-body img {
 }
 
+.author-name {
+  margin-top: 0.5em;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+/* phones */
+@media (max-width: 480px) {
+  .author-name { font-size: 0.9em; }
+}
 .results-carousel {
   overflow: hidden;
 }
