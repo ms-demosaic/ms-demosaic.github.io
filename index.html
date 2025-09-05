@@ -19,6 +19,34 @@
 
 
   <script src="main.js"></script>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.compare').forEach(comp => {
+    const slider = comp.querySelector('.compare-slider');
+    const setPos = v => comp.style.setProperty('--pos', v + '%');
+    const initial = Number(comp.dataset.initial || 50);
+    slider.value = initial; setPos(initial);
+    slider.addEventListener('input', e => setPos(e.target.value));
+    comp.addEventListener('pointerdown', e => {
+      comp.setPointerCapture(e.pointerId);
+      const move = ev => {
+        const r = comp.getBoundingClientRect();
+        const x = Math.min(Math.max(ev.clientX - r.left, 0), r.width);
+        const v = Math.round((x / r.width) * 100);
+        slider.value = v; setPos(v);
+      };
+      move(e);
+      const up = () => {
+        comp.removeEventListener('pointermove', move);
+        comp.removeEventListener('pointerup', up);
+      };
+      comp.addEventListener('pointermove', move);
+      comp.addEventListener('pointerup', up);
+    });
+  });
+});
+</script>
+
   <head>
       <style media = "all">
         body {
@@ -232,66 +260,121 @@
       
   </div>
   </div>
-</section>>
+</section>
 
 <section class="hero teaser">
-  <div class="hero-body">
-  <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
+  <div class="here-body">
+<div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
     <br/>
     <h2 class="title">Results Visualization</h2>
     <div class="content has-text-justified">
       <p class="content has-text-justified">
-        The following examples show a comparison of 4 AE methods (Global, Semantic, Saliency, and Entropy) evaluated on the 4D AE dataset.
+        The following examples compare our method against baselines, with ground-truth provided for reference.
       </p>
     </div>
-      <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
-        <h5 style="text-align:left;">Scene Selection</h5>
-        <div id='novel-scene-selector' style="display:flex; flex-flow: row wrap; justify-content: space-evenly;">
-        </div>
-      </div>
-      <br/>
-      <h3 class="subtitle">AE methods Comparison</h2>
-      <div class="row" style="display:flex; flex-flow: row wrap; justify-content: space-evenly;">
+    <!-- Qualitative row: NAF (slider) | Restormer (slider) | Ground Truth -->    
+    <div class="qual-row">
 
-        <div style="max-width: 50%">
-          <img id='novel-saliency' style='width:100%; padding: 0.2em;' src="assets/individual-frames/0000/saliency/00/0000.jpg">
-          <h5 class="subtitle" style='font-size:0.85em;'>Saliency (Ours)</h5>
-        </div>
-        <div style="max-width: 50%">
-          <img id='novel-global' style='width:100%; padding: 0.2em;' src="assets/individual-frames/0000/global/00/0000.jpg">
-          <h5 class="subtitle" style='font-size:0.85em;'>Global</h5>
-        </div>
-        <div style="max-width: 50%">
-          <img id='novel-semantic' style='width:100%; padding: 0.2em;' src="assets/individual-frames/0000/semantic/00/0000.jpg">
-          <h5 class="subtitle" style='font-size:0.85em;'>Semantic</h5>
-        </div>
-        <div style="max-width: 50%">
-          <img id='novel-entropy' style='width:100%; padding: 0.2em;' src="assets/individual-frames/0000/entropy/00/0000.jpg">
-          <h5 class="subtitle" style='font-size:0.85em;'>Entropy</h5>
-        </div>
-      </div>
-      <br/>
-      <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
-        <h5 style="text-align:left;font-size: 1.2em;">Frame Control</h5>
-        <!-- <p class="content has-text-justified">
-		Notice how generated scenes diverge more with frames further to the right of the slider.
-        </p> -->
-        <div class="row">
-          <div class="col-2"> <div onclick='novel_viewer.cycle_frames(100);' class=selectable>Play</div> </div>
-          <div class="col-2"> <div onclick='novel_viewer.stop_anim();' class=selectable>Pause</div> </div>
-          <!-- <div class="col-2"> <div onclick='novel_viewer.cycle_frames(200);' class=selectable>Play at 5fps</div> </div> -->
-          
-        </div>
-	<br/>
-        <div class="row">
-          <input style="width:100%;margin-left:1em;margin-right:1em;" type="range" min="0" max="99" value="0" id='novel_frame_control' oninput='novel_viewer.change_frame(document.getElementById("novel_frame_control").value);'>
-        </div>
-        <!-- <div class="col-6">
-          <input style="width:100%;margin-left:1em;margin-right:1em;-webkit-transform: rotate(90deg);" type="range" min="0" max="99" value="0" id='novel_frame_control' oninput='novel_viewer.change_frame(document.getElementById("novel_frame_control").value);'>
-        </div> -->
-      </div>
+  <!-- nafsr slider (Ours vs Baseline) -->
+  <div class="qual-card">
+    <div class="compare" data-initial="50" aria-label="Scene 1 NAFSR: Ours vs Baseline">
+      <!-- Baseline nafsr right -->
+      <img class="compare-base"
+           src="assets/results-comparison/s1_sr/naf_rgb.png"
+           alt="NAFSR: Ours vs Baseline — Scene 1" loading="lazy">
+      <!-- Ours + nafsr left -->
+      <img class="compare-top"
+           src="assets/results-comparison/s1_sr/full_naf_rgb.png"
+           alt="Ours error map — Scene 1" loading="lazy">
+      <input class="compare-slider" type="range" min="0" max="100" value="50"
+             aria-label="Reveal Ours versus Baseline error map for Scene 1">
+      <div class="compare-labels" aria-hidden="true"><span> NAFSR + Ours</span><span>NAFSR-L</span></div>
+      
+    </div>
+  </div>
+
+  <!-- Reconstruction slider (Ours vs Baseline) -->
+  <div class="qual-card">
+    <div class="compare" data-initial="50" aria-label="Scene 1 Restormer: Ours vs Baseline">
+      <!-- Baseline reconstruction (bottom) -->
+      <img class="compare-base"
+           src="assets/results-comparison/s1_sr/restormer_rgb.png"
+           alt="Restormer-L — Scene 1" loading="lazy">
+      <!-- Ours reconstruction (top) -->
+      <img class="compare-top"
+           src="assets/results-comparison/s1_sr/full_restormer_rgb.png"
+           alt="Restormer + Ours Scene 1" loading="lazy">
+      <input class="compare-slider" type="range" min="0" max="100" value="50"
+             aria-label="Reveal Ours versus Baseline reconstruction for Scene 1">
+      <div class="compare-labels" aria-hidden="true"><span>Restormer + Ours</span><span> Restormer-L</span></div>
+    </div>
+  </div>
+
+  <!-- Ground truth (static) -->
+  <div class="qual-card gt-wrap">
+    <img src="assets/results-comparison/s1_sr/gt_rgb.png"
+         alt="Ground Truth — Scene 1" loading="lazy">
+    <div class="corner-badge" aria-hidden="true">Ground Truth</div>
+  </div>
+
+</div>
+
+
+   
+    <div class="qual-row">
+
+  <!-- nafsr slider (Ours vs Baseline) -->
+  <div class="qual-card">
+    <div class="compare" data-initial="50" aria-label="Scene 2 NAFSR: Ours vs Baseline">
+      <!-- Baseline nafsr right -->
+      <img class="compare-base"
+           src="assets/results-comparison/s2_sr/naf_rgb.png"
+           alt="NAFSR — Scene 2" loading="lazy">
+      <!-- Ours + nafsr left -->
+      <img class="compare-top"
+           src="assets/results-comparison/s2_sr/full_naf_rgb.png"
+           alt="NAFSR + Ours — Scene 2" loading="lazy">
+      <input class="compare-slider" type="range" min="0" max="100" value="50"
+             aria-label="Reveal Ours versus Baseline NAS for Scene 1">
+      <div class="compare-labels" aria-hidden="true"><span> NAFSR + Ours</span><span>NAFSR-L</span></div>
+      
+    </div>
+  </div>
+
+  <!-- Reconstruction slider (Ours vs Baseline) -->
+  <div class="qual-card">
+    <div class="compare" data-initial="50" aria-label="Scene 2 Restormer: Ours vs Baseline">
+      <!-- Baseline reconstruction (bottom) -->
+      <img class="compare-base"
+           src="assets/results-comparison/s2_sr/restormer_rgb.png"
+           alt="Restormer-L — Scene 2" loading="lazy">
+      <!-- Ours reconstruction (top) -->
+      <img class="compare-top"
+           src="assets/results-comparison/s2_sr/full_restormer_rgb.png"
+           alt="Restormer-L + Ours — Scene 2" loading="lazy">
+      <input class="compare-slider" type="range" min="0" max="100" value="50"
+             aria-label="Reveal Ours versus Baseline Restormer for Scene 2">
+      <div class="compare-labels" aria-hidden="true"><span>Restormer + Ours</span><span> Restormer-L</span></div>
+    </div>
+  </div>
+
+  <!-- Ground truth (static) -->
+  <div class="qual-card gt-wrap">
+    <img src="assets/results-comparison/s2_sr/gt_rgb.png"
+         alt="Ground Truth — Scene 2" loading="lazy">
+    <div class="corner-badge" aria-hidden="true">Ground Truth</div>
+  </div>
+
+</div>
+
+
+<!-- Optional per-row caption -->
+<!-- <div class="qual-cap">Scene 1 — edges, fine texture, and flat regions.</div> -->
+
   </div>
   </div>
+  	<br/>
+  <br/>
 </section>
 
 <!--<section class="section" id="BibTeX">-->
@@ -322,65 +405,19 @@
         </div>
       </div>
       <br/>
-      <!-- <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
-        <h4 style="text-align:left;">Motion Selection</h2>
-        <div class="row">
-          <div class="col-2"> <div id='orbit_selector' onclick='novel_viewer.change_variant("orbit");' class=selectable>Orbit</div> </div>
-          <div class="col-2"> <div id='spin_selector' onclick='novel_viewer.change_variant("spin");' class=selectable>Spin</div> </div>
-          <div class="col-2"> <div id='hop_selector' onclick='novel_viewer.change_variant("hop");' class=selectable>Hop</div> </div>
-        </div>
-      </div>
-      <br/>
-      <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
-        <h4 style="text-align:left;">Sample Instance</h2>
-        <p class="content has-text-justified">
-		The stochastic nature of these models allow multiple plausible realities to be sampled. We provide three here.
-        </p>
-        <div class="row">
-          <div id='novel_sample_selector_1' style='margin-left:1em;cursor:pointer;background-color:rgb(240,240,240);border-radius:1em;padding:1em;' class='col selectable' onclick='novel_viewer.change_sample(0);'> 1 </div>
-          <div id='novel_sample_selector_2' style='margin-left:0.4em;cursor:pointer;background-color:rgb(240,240,240);border-radius:1em;padding:1em;' class='col selectable' onclick='novel_viewer.change_sample(1);'> 2 </div>
-          <div id='novel_sample_selector_3' style='margin-left:0.4em;margin-right:1em;cursor:pointer;background-color:rgb(240,240,240);border-radius:1em;padding:1em;' class='col selectable' onclick='novel_viewer.change_sample(2);'> 3 </div>
-        </div>
-      </div>
-      <br/> -->
+ 
       <h3 class="subtitle">Dataset Viewer</h2>
       
       <div class="row" style="justify-content: space-evenly;">
-
-          <!-- <p id ='text-ev' class="subtitle" style='font-size:0.85em;'><p> -->
            
 
         <div class=col-3 style='flex:1 1 50%;max-width:50%;'>
           <img id='data-0' style='width:100%;' src="assets/images/data/0000/0000.jpg">
          
-        </div>
-        <!-- <div class=col-8 style='flex:0 0 24%;max-width:30%;'>
-          <img id='data-1' style='width:100%;' src="assets/images/data/0000/0500.jpg">
-          <h5 id ='text-1' class="subtitle" style='font-size:0.85em;'></h5>
-        </div>
-        <div class=col-8 style='flex:0 0 24%;max-width:30%;margin-right: 0%;'>
-          <img id='data-2' style='width:100%;' src="assets/images/data/0000/1000.jpg">
-          <h5 id ='text-2' class="subtitle" style='font-size:0.85em;'></h5>
-        </div> -->
-        <!-- <div class=col-12 style='flex:0 0 20%;max-width:25%;'>
-          <img id='novel-entropy' style='width:100%;' src="assets/individual-frames/0000/entropy/00/0000.jpg"> -->
-          <!-- <h5 class="subtitle" style='font-size:0.85em;'>Entropy</h5> -->
-        <!-- </div> -->
-        
+        </div>      
        
       </div>
-      <!-- <br/>
-      <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
-        <h5 style="text-align:left;font-size: 1.2em;">Frame Control</h5> -->
-        <!-- <p class="content has-text-justified">
-		Notice how generated scenes diverge more with frames further to the right of the slider.
-        </p> -->
-        <!-- <div class="row">
-          <div class="col-2"> <div onclick='novel_viewer.cycle_frames(100);' class=selectable>Play</div> </div>
-          <div class="col-2"> <div onclick='novel_viewer.stop_anim();' class=selectable>Pause</div> </div> -->
-          <!-- <div class="col-2"> <div onclick='novel_viewer.cycle_frames(200);' class=selectable>Play at 5fps</div> </div> -->
-          
-        <!-- </div> -->
+
 	<br/>
         <div class="col">
           <input style="width:85%;margin-left:1em;margin-right:3.5em;" type="range" min="0" max="19" value="0" id='data_frame_control' oninput='novel_viewer.change_frame_data(document.getElementById("data_frame_control").value);'>
@@ -389,8 +426,6 @@
           <p id ='text-ev' class="subtitle" style='font-size:0.85em; text-align: center;'> Shutter Speed</p>
    
         </div>
-
-      <!-- </div> -->
   </div>
   </div>
 </section>

@@ -166,3 +166,113 @@ body {
 #interpolation-image-wrapper img {
   border-radius: 5px;
 }
+
+
+/* === Qualitative rows: 3-up on desktop, 2-up tablet, 1-up phone === */
+.qual-row{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1em;
+  margin-bottom: 1.25em;
+}
+@media (max-width: 1024px){
+  .qual-row{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 720px){
+  .qual-row{ grid-template-columns: 1fr; }
+}
+
+/* Card look to match your site */
+.qual-card{
+  position: relative;
+  background: #fff;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 0; /* match .results-carousel .item */
+}
+
+/* Compare sliders (reuse from before) */
+/* .compare{ --pos:50%; aspect-ratio: 3/2; background:#0a0a0a; }
+.compare img{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  user-select:none; pointer-events:none;
+}
+.compare .compare-top{
+  clip-path: polygon(0 0, var(--pos) 0, var(--pos) 100%, 0 100%);
+}
+.compare .compare-slider{
+  position:absolute; inset:0; width:100%; height:100%;
+  -webkit-appearance:none; appearance:none; background:transparent;
+  cursor: ew-resize; outline:none;
+}
+.compare .compare-slider::-webkit-slider-thumb{
+  -webkit-appearance:none; width:2px; height:100%; background:transparent;
+  box-shadow:
+    calc(var(--pos) - 1px) 0 0 0 #fff,
+    calc(var(--pos) - 1px) 0 0 6px rgba(0,0,0,.25);
+  border:0;
+}
+.compare .compare-slider::-moz-range-thumb{
+  width:2px; height:100%; background:#fff; border:0;
+}
+.compare .compare-labels{
+  position:absolute; top:.5rem; left:.5rem; right:.5rem;
+  display:flex; justify-content:space-between; font-size:.85rem;
+  font-weight:600; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.6);
+  pointer-events:none;
+} */
+
+
+.compare{
+  --pos:50%;
+  aspect-ratio: 3/2;
+  background:#0a0a0a;
+  position: relative;      /* establish stacking context */
+  cursor: col-resize;
+}
+
+/* layer order */
+.compare img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; user-select:none; pointer-events:none; z-index:1; }
+.compare .compare-top{ clip-path: polygon(0 0, var(--pos) 0, var(--pos) 100%, 0 100%); z-index:2; }
+.compare .compare-slider{ position:absolute; inset:0; width:100%; height:100%; -webkit-appearance:none; appearance:none; background:transparent; cursor:ew-resize; outline:none; z-index:5; }
+.compare .compare-labels{ position:absolute; top:.5rem; left:.5rem; right:.5rem; display:flex; justify-content:space-between; font-size:.85rem; font-weight:600; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.6); pointer-events:none; z-index:6; }
+
+/* white bar ABOVE images, BELOW slider */
+.compare::after{
+  content:"";
+  position:absolute; top:0; bottom:0;
+  left: var(--pos);
+  transform: translateX(-1px);
+  width:2px;
+  background:#fff;
+  box-shadow:0 0 6px rgba(0,0,0,.35);
+  pointer-events:none;
+  z-index:4;
+}
+
+/* hide native track visuals (optional) */
+.compare .compare-slider::-webkit-slider-runnable-track{ background:transparent; }
+.compare .compare-slider::-moz-range-track{ background:transparent; }
+
+/* keep thumb invisible (or swap for a dot if you want) */
+.compare .compare-slider::-webkit-slider-thumb{ -webkit-appearance:none; width:24px; height:24px; background:transparent; border:0; }
+.compare .compare-slider::-moz-range-thumb{ width:24px; height:24px; background:transparent; border:0; }
+
+
+
+
+/* Ground truth panel */
+.gt-wrap{ aspect-ratio: 3/2; background:#0a0a0a; }
+.gt-wrap img{ width:100%; height:100%; object-fit:cover; }
+
+/* Corner badges */
+.corner-badge{
+  position:absolute; top:.5rem; left:.5rem;
+  color:#fff; font-weight:600; font-size:.85rem;
+  text-shadow:0 1px 2px rgba(0,0,0,.6);
+  font-family: 'Google Sans', sans-serif;
+}
+
+/* Small captions under each row (optional) */
+.qual-cap{ margin-top:.4rem; font-size:.95em; color:#555; }
