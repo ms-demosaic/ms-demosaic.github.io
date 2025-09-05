@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html >
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="description" content="Multispectral Demosaicing via DualCameras">
@@ -86,10 +86,11 @@
             <span class="author-block"><sup>1</sup>AI Center-Toronto, Samsung Electronics&nbsp;</span>
             &nbsp;
             <span class="author-block"><sup>2</sup>York University</span>
-          </div>
-          <br>
-          <div class="is-size-5 publication-authors">
-            <span class="author-block">ICCV 2025 <span style="color: rgb(218, 141, 239);">[Highlight]</span></span>
+            <br>
+            <span class="author-block"><sup>*</sup>Equal Contribution</span>
+            <br>
+          
+            <span class="author-block" style="margin-top: 6px;">ICCV 2025 <span style="color: rgb(218, 141, 239);">[Highlight]</span></span>
           </div>
         </div>
       </div>
@@ -215,19 +216,14 @@
   <div class="hero-body">
   <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
     <br/>
-    <h2 class="title">Download the 4D AE Dataset</h2>
+    <h2 class="title">Releases (Models & Dataset)</h2>
     <div class="content has-text-justified">
       <p class="content has-text-justified">
-        Below are the download link of the 4D AE dataset. By clicking on 'Download' button, you will be directed to another link where you can download the dataset of all the 9 scenes. 
-        It contains 3 folders named as 'dng', 'sRGB_npy', and 'RAW_npy'. In the 'dng' folder, 9 sub-folders are listed where each of them has 1500 RAW images (6720 * 4480 pixels) stored in the dng formate. 
-        They are ordered as 100 frame * 15 exposure (15 s, 8 s, 6 s, 4 s, 2 s, 1 s, 1/2 s, 1/4 s, 1/8 s, 1/15 s, 1/30 s, 1/60 s, 1/125 s, 1/250 s, 1/500 s). 
-        The 'sRGB_npy' folder contains 9 npy files in the size of 100 frame * 40 exposure * 640 * 960 * 3, and 'RAW_npy' has 9 files for each scene in the size of 100 frame * 40 exposure * 1120 * 1680. 
-        The 40 exposure time includes 15 s, 13 s, 10 s, 8 s, 6 s, 5 s, 4 s, 3.2 s, 2.5 s, 2 s, 1.6 s, 1.3 s, 1 s, 0.8 s, 0.6 s, 0.5 s, 0.4 s, 0.3 s, 1/4 s, 1/5 s, 1/6 s, 1/8 s, 1/10 s, 1/13 s, 1/15 s,
-        1/20 s, 1/25 s, 1/30 s, 1/40 s, 1/50 s, 1/60 s, 1/80 s, 1/100 s, 1/125 s, 1/160 s, 1/200 s, 1/250 s, 1/320 s, 1/400 s, 1/500 s.
-      </p>
+      This release packages everything needed to reproduce and extend our RGB-guided MS demosaicing work. It includes a <code>checkpoints/</code> directory with pretrained weights: <code>checkpoints/base_models/</code> (backbone weights) and <code>checkpoints/models/</code> (task-specific RGB-guided MS demosaicing checkpoints), and the dataset in NPY format under <code>npys/</code> as four zip archives: <code>cropped_ms_npys.zip</code>, <code>cropped_rgb_npys.zip</code>, <code>ms_npys.zip</code>, and <code>rgb_npys.zip</code>. The dataset pairs co-captured RGB frames with MS mosaics and provides high-fidelity ground-truth MS images, enabling rigorous training and evaluation of RGB-guided MS demosaicing methods. Please refer to the steps on the <a href="https://github.com/SamsungLabs/ms-demosaic" target="_blank" rel="noopener">Code</a> page to set up the experiments.
+    </p>
     </div>
-      <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:0.5em;background-image: url(assets/icons/novel/025.jpg);' class="container is-max-desktop has-text-centered">
-        <button type="button" style="border-radius: 0.8em; border-color: beige; padding: 0.5em 0.7em;"> <a href="https://ln5.sync.com/dl/8b886b5b0/mp2h6pjc-3kkmhqr4-7gjgvpae-czxz58jn" style="text-decoration:none; color: rgb(57, 14, 173);font-weight: 700;">Download</a></button>
+      <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:0.5em;background-image: url(assets/icons/novel/ms1.png);' class="container is-max-desktop has-text-centered">
+        <button type="button" style="border-radius: 0.8em; border-color: beige; padding: 0.5em 0.7em;"> <a href="https://ln5.sync.com/dl/e9934f5f0?sync_id=56038098560101#z38qx6xq-ws7tgx5p-dwxs2cyx-sn9isa2c" style="text-decoration:none; color: rgb(57, 14, 173);font-weight: 700;" target="_blank">Download Releases</a></button>
         <div id='download-scene-selector' style="display:flex; flex-flow: row wrap; justify-content: space-evenly;">
         </div>
       </div>

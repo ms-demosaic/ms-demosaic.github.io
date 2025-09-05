@@ -27,6 +27,7 @@ body {
   font-family: 'Google Sans', sans-serif;
 }
 
+.has-text-justified { text-align: justify; hyphens: auto; }
 
 .publication-title {
 }
