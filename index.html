@@ -465,44 +465,35 @@ document.addEventListener('DOMContentLoaded', () => {
 <!--  </div>-->
 <!--</section>-->
 
-<section class="hero teaser">
+<section class="hero teaser" id="msrgb-capture">
   <div class="hero-body">
-  <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
-    <br/>
-    <h2 class="title">Sample Data</h2>
-    <div class="content has-text-justified">
+    <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
+    <div class="container is-max-desktop">
+      <h2 class="title">Dual-Camera MS-RGB Capturing & Channel Formation</h2>
       <p class="content has-text-justified">
-        The following examples show 2 sample datasets with 15 exposure values in 20 time steps..
+        We built a controlled MS-RGB rig that emulates two synchronized cameras with a fixed 1 cm baseline: a Sony Alpha 1 is shuttled between MS and RGB positions on an Arduino-driven linear stage, while a Telelumen OctaLight box provides the only illumination in a darkroom. RGB frames are captured under D65. MS data are simulated by re-illuminating the scene with seven narrow-band spectra and combining captures, yielding 21 responses (7x3 RGB). We then keep the 16 most informative channels (discarding five low-signal/redundant ones) to form the 16-channel MS representation used in our experiments.
       </p>
+
+            <figure class="image card" style="border-radius:1em; overflow:hidden; margin-top:1rem;">
+        <img style="padding-top: 1em; padding-left: 10%; padding-right: 10%;" src="assets/figs/capture_rig.jpg"
+             alt="Camera on a linear stage facing a scene inside an illumination box; labels mark pixel-shift camera, illumination box, and linear stage."
+             loading="lazy" style="width:100%;height:auto;">
+        <figcaption class="p-3">
+          <strong>Capture setup.</strong> Linear stage + programmable illumination emulate a fixed-baseline MS-RGB dual camera.
+        </figcaption>
+      </figure>
+
+      <!-- Figure 2: 21→16 selection (full row) -->
+      <figure class="image card" style="border-radius:1em; overflow:hidden; margin-top:1rem;">
+        <img style="padding-top: 1em; padding-left: 1%; padding-right: 1%;" src="assets/figs/channel_selection.jpg"
+             alt="SPDs with RGB CFA producing 21 channel responses; grid of per-channel images with the 16 selected channels highlighted."
+             loading="lazy" style="width:100%;height:auto;">
+        <figcaption class="p-3">
+          <strong>Channel formation.</strong> Seven illuminations x RGB yield 21 responses; 16 are selected to simulate a 4x4 MSFA(highlightedbyredboxes).
+        </figcaption>
+      </figure>
     </div>
-      <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
-        <h5 style="text-align:left;">Scene Selection</h5>
-        <div id='novel-scene-selector_data' style="display:flex; flex-flow: row wrap; justify-content: space-evenly;">
-        </div>
-      </div>
-      <br/>
- 
-      <h3 class="subtitle">Dataset Viewer</h2>
-      
-      <div class="row" style="justify-content: space-evenly;">
-           
-
-        <div class=col-3 style='flex:1 1 50%;max-width:50%;'>
-          <img id='data-0' style='width:100%;' src="assets/images/data/0000/0000.jpg">
-         
-        </div>      
-       
-      </div>
-
-	<br/>
-        <div class="col">
-          <input style="width:85%;margin-left:1em;margin-right:3.5em;" type="range" min="0" max="19" value="0" id='data_frame_control' oninput='novel_viewer.change_frame_data(document.getElementById("data_frame_control").value);'>
-          <h5 id ='text-0' class="subtitle" style='font-size:0.85em;'></h5>
-          <input style="width:85%;margin-left:1em;margin-right:3.5em;" type="range" min="0" max="14" value="7" id='data_ev_control' oninput='novel_viewer.change_ev_data(document.getElementById("data_ev_control").value);'>
-          <p id ='text-ev' class="subtitle" style='font-size:0.85em; text-align: center;'> Shutter Speed</p>
-   
-        </div>
-  </div>
+    </div>
   </div>
 </section>
 
