@@ -468,7 +468,8 @@ document.addEventListener('DOMContentLoaded', () => {
 <section class="hero teaser" id="msrgb-capture">
   <div class="hero-body">
     <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
-    <div class="container is-max-desktop">
+    <br/>
+      <div class="container is-max-desktop">
       <h2 class="title">Dual-Camera MS-RGB Capturing & Channel Formation</h2>
       <p class="content has-text-justified">
         We built a controlled MS-RGB rig that emulates two synchronized cameras with a fixed 1 cm baseline: a Sony Alpha 1 is shuttled between MS and RGB positions on an Arduino-driven linear stage, while a Telelumen OctaLight box provides the only illumination in a darkroom. RGB frames are captured under D65. MS data are simulated by re-illuminating the scene with seven narrow-band spectra and combining captures, yielding 21 responses (7x3 RGB). We then keep the 16 most informative channels (discarding five low-signal/redundant ones) to form the 16-channel MS representation used in our experiments.
