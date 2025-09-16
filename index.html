@@ -84,30 +84,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- Call the qualitative scene switcher you just added to main.js -->
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    if (window.initQualSceneSwitcher) {
-      window.initQualSceneSwitcher({
-        selectorId: 'qual-scene-selector',
-        base: 'assets/results-comparison',
-        scenes: [
-          { id: 's1', label: 'Scene 1' },
-          { id: 's2', label: 'Scene 2' },
-          { id: 's3', label: 'Scene 3' },
-          { id: 's4', label: 'Scene 4' } 
-          // add more scenes as needed (use folder names before `_sr`)
-        ],
-        files: {
-          nafBase: 'naf_rgb.png',
-          nafTop:  'full_naf_rgb.png',
-          resBase: 'restormer_rgb.png',
-          resTop:  'full_restormer_rgb.png',
-          gt:      'gt_rgb.png'
-        },
-        deepLink: true,          // optional — enables ?qualScene=s2
-        deepLinkKey: 'qualScene'
-      });
-    }
+  document.addEventListener('DOMContentLoaded', () => {
+    const scenes4 = [
+      { id: 's1', label: 'Scene 1' },
+      { id: 's2', label: 'Scene 2' },
+      { id: 's3', label: 'Scene 3' },
+      { id: 's4', label: 'Scene 4' }
+    ];
+
+    // Block 1: *_sr (existing)
+    initQualSceneSwitcher({
+      rootSelector: '#qual-section',
+      selectorId: 'qual-scene-selector',
+      folderSuffix: '_sr',
+      scenes: scenes4,
+      imgIds: {
+        nafBase: '#naf-base',  nafTop: '#naf-top',
+        resBase: '#res-base',  resTop: '#res-top',
+        gt: '#gt-img'
+      },
+      labels: {
+        nafBase: 'NAFSR baseline',
+        nafTop:  'NAFSR + Ours',
+        resBase: 'Restormer baseline',
+        resTop:  'Restormer + Ours',
+        gt:      'Ground Truth'
+      },
+      deepLinkKey: 'qualScene'   // keeps your existing links working
+    });
+
+    // Block 2: *_full (new)
+    initQualSceneSwitcher({
+      rootSelector: '#qual-full-section',
+      selectorId: 'qual-full-scene-selector',
+      folderSuffix: '_full',     // << use *_full folders
+      scenes: scenes4,
+      imgIds: {
+        nafBase: '#naf2-base',   nafTop: '#naf2-top',
+        resBase: '#res2-base',   resTop: '#res2-top',
+        gt: '#gt2-img'
+      },
+      labels: {
+        nafBase: 'NAFNet',           // alt text + a11y
+        nafTop:  'NAFNet + Ours',
+        resBase: 'Restormer',
+        resTop:  'Restormer + Ours',
+        gt:      'Ground Truth'
+      },
+      deepLinkKey: 'qualScene2'  // separate URL param for this block
+    });
   });
+
 </script>
 <body>
 
@@ -291,22 +318,76 @@ document.addEventListener('DOMContentLoaded', () => {
 </section>
 
 <section class="hero teaser" id="qual-section">
-  <div class="here-body">
+  <div class="hero-body">
     <div class="container is-max-desktop has-text-centered"
          style="border-radius:1em; box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; padding:1em;">
       <br/>
       <h2 class="title">Results Visualization</h2>
       <div class="content has-text-justified">
         <p class="content has-text-justified">
-          The following examples compare our method against baselines, with ground-truth provided for reference.
+          We visualize two asymmetric dual-camera scenarios: (1) different CFA patterns at equal resolution, and (2) different sensor resolutions (low-res MS guided by high-res RGB). Each scenario compares our method with baselines and ground truth.
         </p>
       </div>
-  
 
-    <!-- Scene Selection -->
+      <!-- Scene selector -->
     <div class="container is-max-desktop has-text-centered"
          style="border-radius:1em; box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; padding:1em;">
-      <h5 style="text-align:left;">Scene Selection</h5>
+      <h5 style="font-weight: 700;">Equal Resolution</h5>
+      <h6 style="text-align:left;">Scene Selection</h6>
+      <div id="qual-full-scene-selector"
+           style="display:flex; flex-flow: row wrap; justify-content: space-evenly;"></div>
+    </div>
+
+    <br/>
+  <div class="container is-max-desktop has-text-centered">
+    <div class="qual-row">
+      <!-- NAFNet slider -->
+      <div class="qual-card">
+        <div class="compare" data-initial="50" aria-label="NAFNet: Ours vs Baseline">
+          <img class="compare-base" id="naf2-base"
+               src="assets/results-comparison/s1_full/naf_rgb.png"
+               alt="NAFNet baseline — S1" loading="lazy">
+          <img class="compare-top" id="naf2-top"
+               src="assets/results-comparison/s1_full/full_naf_rgb.png"
+               alt="NAFNet + Ours — S1" loading="lazy">
+          <input class="compare-slider" type="range" min="0" max="100" value="50">
+          <div class="compare-labels" aria-hidden="true">
+            <span>NAFNet + Ours</span><span>NAFNet</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Restormer slider (no “-L”) -->
+      <div class="qual-card">
+        <div class="compare" data-initial="50" aria-label="Restormer: Ours vs Baseline">
+          <img class="compare-base" id="res2-base"
+               src="assets/results-comparison/s1_full/restormer_rgb.png"
+               alt="Restormer baseline — S1" loading="lazy">
+          <img class="compare-top" id="res2-top"
+               src="assets/results-comparison/s1_full/full_restormer_rgb.png"
+               alt="Restormer + Ours — S1" loading="lazy">
+          <input class="compare-slider" type="range" min="0" max="100" value="50">
+          <div class="compare-labels" aria-hidden="true">
+            <span>Restormer + Ours</span><span>Restormer</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ground truth -->
+      <div class="qual-card gt-wrap">
+        <img id="gt2-img"
+             src="assets/results-comparison/s1_full/gt_rgb.png"
+             alt="Ground Truth — S1" loading="lazy">
+        <div class="corner-badge" aria-hidden="true">Ground Truth</div>
+      </div>
+    </div>
+    </div>
+   <br/>
+      <!-- Scene Selection -->
+    <div class="container is-max-desktop has-text-centered"
+         style="border-radius:1em; box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; padding:1em;">
+      <h5 style="font-weight: 700;">Asymmetric Resolution</h5>
+    <h6 style="text-align:left;">Scene Selection</h6>
       <!-- This is where buttons will be injected -->
       <div id="qual-scene-selector"
            style="display:flex; flex-flow: row wrap; justify-content: space-evenly;"></div>
@@ -315,6 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <br/>
 
     <!-- Qualitative row: NAFSR slider | Restormer slider | Ground Truth -->
+  <div class="container is-max-desktop has-text-centered">
     <div class="qual-row">
 
       <!-- NAFSR slider (Ours vs Baseline) -->
@@ -366,7 +448,6 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   </div>
   </div>
-  <br/>
   <br/>
 </section>
 
