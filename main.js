@@ -320,17 +320,4 @@ class Sample_viewer{
 
 
 // create the viewer here to make it global, and accessible from the HTML
-var novel_viewer = null;
 
-document.addEventListener("DOMContentLoaded", function() {
-	// create the viewer, and set the initial frame
-	novel_viewer = new Sample_viewer('novel',99,4);
-	novel_viewer.change_scene('0000');
-	novel_viewer.change_frame(0);
-	// novel_viewer.change_sample(0);
-	novel_viewer.change_scene_data('0000');
-	novel_viewer.change_frame_data(0);
-	novel_viewer.change_ev_data(7); //set exposure to something we can initially see
-	novel_viewer.cycle_frames(100);
-	// novel_viewer.change_variant('orbit');
-});
