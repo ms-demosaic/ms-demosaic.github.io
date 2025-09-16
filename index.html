@@ -81,6 +81,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
   gtag('config', 'G-JLZYXDX25X');
 </script>
+
+<!-- Call the qualitative scene switcher you just added to main.js -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.initQualSceneSwitcher) {
+      window.initQualSceneSwitcher({
+        selectorId: 'qual-scene-selector',
+        base: 'assets/results-comparison',
+        scenes: [
+          { id: 's1', label: 'Scene 1' },
+          { id: 's2', label: 'Scene 2' },
+          { id: 's3', label: 'Scene 3' },
+          { id: 's4', label: 'Scene 4' } 
+          // add more scenes as needed (use folder names before `_sr`)
+        ],
+        files: {
+          nafBase: 'naf_rgb.png',
+          nafTop:  'full_naf_rgb.png',
+          resBase: 'restormer_rgb.png',
+          resTop:  'full_restormer_rgb.png',
+          gt:      'gt_rgb.png'
+        },
+        deepLink: true,          // optional — enables ?qualScene=s2
+        deepLinkKey: 'qualScene'
+      });
+    }
+  });
+</script>
 <body>
 
 <section class="hero">
@@ -262,120 +290,87 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </section>
 
-<section class="hero teaser">
+<section class="hero teaser" id="qual-section">
   <div class="here-body">
-<div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
+    <div class="container is-max-desktop has-text-centered"
+         style="border-radius:1em; box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; padding:1em;">
+      <br/>
+      <h2 class="title">Results Visualization</h2>
+      <div class="content has-text-justified">
+        <p class="content has-text-justified">
+          The following examples compare our method against baselines, with ground-truth provided for reference.
+        </p>
+      </div>
+  
+
+    <!-- Scene Selection -->
+    <div class="container is-max-desktop has-text-centered"
+         style="border-radius:1em; box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; padding:1em;">
+      <h5 style="text-align:left;">Scene Selection</h5>
+      <!-- This is where buttons will be injected -->
+      <div id="qual-scene-selector"
+           style="display:flex; flex-flow: row wrap; justify-content: space-evenly;"></div>
+    </div>
+
     <br/>
-    <h2 class="title">Results Visualization</h2>
-    <div class="content has-text-justified">
-      <p class="content has-text-justified">
-        The following examples compare our method against baselines, with ground-truth provided for reference.
-      </p>
-    </div>
-    <!-- Qualitative row: NAF (slider) | Restormer (slider) | Ground Truth -->    
+
+    <!-- Qualitative row: NAFSR slider | Restormer slider | Ground Truth -->
     <div class="qual-row">
 
-  <!-- nafsr slider (Ours vs Baseline) -->
-  <div class="qual-card">
-    <div class="compare" data-initial="50" aria-label="Scene 1 NAFSR: Ours vs Baseline">
-      <!-- Baseline nafsr right -->
-      <img class="compare-base"
-           src="assets/results-comparison/s1_sr/naf_rgb.png"
-           alt="NAFSR: Ours vs Baseline — Scene 1" loading="lazy">
-      <!-- Ours + nafsr left -->
-      <img class="compare-top"
-           src="assets/results-comparison/s1_sr/full_naf_rgb.png"
-           alt="Ours error map — Scene 1" loading="lazy">
-      <input class="compare-slider" type="range" min="0" max="100" value="50"
-             aria-label="Reveal Ours versus Baseline error map for Scene 1">
-      <div class="compare-labels" aria-hidden="true"><span> NAFSR + Ours</span><span>NAFSR-L</span></div>
-      
+      <!-- NAFSR slider (Ours vs Baseline) -->
+      <div class="qual-card">
+        <div class="compare" data-initial="50" aria-label="NAFSR: Ours vs Baseline">
+          <!-- Baseline (bottom) -->
+          <img class="compare-base" id="naf-base"
+               src="assets/results-comparison/s1_sr/naf_rgb.png"
+               alt="NAFSR baseline — S1" loading="lazy">
+          <!-- Ours (top) -->
+          <img class="compare-top" id="naf-top"
+               src="assets/results-comparison/s1_sr/full_naf_rgb.png"
+               alt="NAFSR + Ours — S1" loading="lazy">
+          <input class="compare-slider" type="range" min="0" max="100" value="50"
+                 aria-label="Reveal NAFSR results">
+          <div class="compare-labels" aria-hidden="true">
+            <span>NAFSR + Ours</span><span>NAFSR-L</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Restormer slider (Ours vs Baseline) -->
+      <div class="qual-card">
+        <div class="compare" data-initial="50" aria-label="Restormer: Ours vs Baseline">
+          <!-- Baseline (bottom) -->
+          <img class="compare-base" id="res-base"
+               src="assets/results-comparison/s1_sr/restormer_rgb.png"
+               alt="Restormer baseline — S1" loading="lazy">
+          <!-- Ours (top) -->
+          <img class="compare-top" id="res-top"
+               src="assets/results-comparison/s1_sr/full_restormer_rgb.png"
+               alt="Restormer + Ours — S1" loading="lazy">
+          <input class="compare-slider" type="range" min="0" max="100" value="50"
+                 aria-label="Reveal Restormer results">
+          <div class="compare-labels" aria-hidden="true">
+            <span>Restormer + Ours</span><span>Restormer-L</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ground truth (static) -->
+      <div class="qual-card gt-wrap">
+        <img id="gt-img"
+             src="assets/results-comparison/s1_sr/gt_rgb.png"
+             alt="Ground Truth — S1" loading="lazy">
+        <div class="corner-badge" aria-hidden="true">Ground Truth</div>
+      </div>
+
     </div>
   </div>
-
-  <!-- Reconstruction slider (Ours vs Baseline) -->
-  <div class="qual-card">
-    <div class="compare" data-initial="50" aria-label="Scene 1 Restormer: Ours vs Baseline">
-      <!-- Baseline reconstruction (bottom) -->
-      <img class="compare-base"
-           src="assets/results-comparison/s1_sr/restormer_rgb.png"
-           alt="Restormer-L — Scene 1" loading="lazy">
-      <!-- Ours reconstruction (top) -->
-      <img class="compare-top"
-           src="assets/results-comparison/s1_sr/full_restormer_rgb.png"
-           alt="Restormer + Ours Scene 1" loading="lazy">
-      <input class="compare-slider" type="range" min="0" max="100" value="50"
-             aria-label="Reveal Ours versus Baseline reconstruction for Scene 1">
-      <div class="compare-labels" aria-hidden="true"><span>Restormer + Ours</span><span> Restormer-L</span></div>
-    </div>
   </div>
-
-  <!-- Ground truth (static) -->
-  <div class="qual-card gt-wrap">
-    <img src="assets/results-comparison/s1_sr/gt_rgb.png"
-         alt="Ground Truth — Scene 1" loading="lazy">
-    <div class="corner-badge" aria-hidden="true">Ground Truth</div>
-  </div>
-
-</div>
-
-
-   
-    <div class="qual-row">
-
-  <!-- nafsr slider (Ours vs Baseline) -->
-  <div class="qual-card">
-    <div class="compare" data-initial="50" aria-label="Scene 2 NAFSR: Ours vs Baseline">
-      <!-- Baseline nafsr right -->
-      <img class="compare-base"
-           src="assets/results-comparison/s2_sr/naf_rgb.png"
-           alt="NAFSR — Scene 2" loading="lazy">
-      <!-- Ours + nafsr left -->
-      <img class="compare-top"
-           src="assets/results-comparison/s2_sr/full_naf_rgb.png"
-           alt="NAFSR + Ours — Scene 2" loading="lazy">
-      <input class="compare-slider" type="range" min="0" max="100" value="50"
-             aria-label="Reveal Ours versus Baseline NAS for Scene 1">
-      <div class="compare-labels" aria-hidden="true"><span> NAFSR + Ours</span><span>NAFSR-L</span></div>
-      
-    </div>
-  </div>
-
-  <!-- Reconstruction slider (Ours vs Baseline) -->
-  <div class="qual-card">
-    <div class="compare" data-initial="50" aria-label="Scene 2 Restormer: Ours vs Baseline">
-      <!-- Baseline reconstruction (bottom) -->
-      <img class="compare-base"
-           src="assets/results-comparison/s2_sr/restormer_rgb.png"
-           alt="Restormer-L — Scene 2" loading="lazy">
-      <!-- Ours reconstruction (top) -->
-      <img class="compare-top"
-           src="assets/results-comparison/s2_sr/full_restormer_rgb.png"
-           alt="Restormer-L + Ours — Scene 2" loading="lazy">
-      <input class="compare-slider" type="range" min="0" max="100" value="50"
-             aria-label="Reveal Ours versus Baseline Restormer for Scene 2">
-      <div class="compare-labels" aria-hidden="true"><span>Restormer + Ours</span><span> Restormer-L</span></div>
-    </div>
-  </div>
-
-  <!-- Ground truth (static) -->
-  <div class="qual-card gt-wrap">
-    <img src="assets/results-comparison/s2_sr/gt_rgb.png"
-         alt="Ground Truth — Scene 2" loading="lazy">
-    <div class="corner-badge" aria-hidden="true">Ground Truth</div>
-  </div>
-
-</div>
-
-
-<!-- Optional per-row caption -->
-<!-- <div class="qual-cap">Scene 1 — edges, fine texture, and flat regions.</div> -->
-
-  </div>
-  </div>
-  	<br/>
+  <br/>
   <br/>
 </section>
+
+
 
 <!--<section class="section" id="BibTeX">-->
 <!--  <div class="container is-max-desktop content">-->
