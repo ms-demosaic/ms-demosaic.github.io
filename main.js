@@ -328,13 +328,13 @@ class Sample_viewer{
       ],
       files: {
         // patterns (replace {ch})
-			msChannelPattern:  'ms_channel_{ch}.png',
-			msMosaic:          'ms_mosaic.png',
-			msSRGB:            'ms_view1_srgb.png',
-			rgbChannelPattern: 'rgb_view2_channel_{ch}.png',
-			rgbMosaic:         'rgb_view2_mosaic.png',
-			rgbSRGB:           'rgb_view2_srgb.png',
-			thumb:             'ms_view1_srgb.png'
+			msChannelPattern:  'ms_channel_{ch}.webp',
+			msMosaic:          'ms_mosaic.webp',
+			msSRGB:            'ms_view1_srgb.webp',
+			rgbChannelPattern: 'rgb_view2_channel_{ch}.webp',
+			rgbMosaic:         'rgb_view2_mosaic.webp',
+			rgbSRGB:           'rgb_view2_srgb.webp',
+			thumb:             'ms_view1_srgb.webp'
       },
       msCount: 16,
       rgbCount: 3,
