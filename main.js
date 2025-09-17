@@ -339,8 +339,8 @@ class Sample_viewer{
       msCount: 16,
       rgbCount: 3,
       // autoplay speeds (ms)
-      msInterval: 1000,
-      rgbInterval: 1100
+      msInterval: 1500,
+      rgbInterval: 1800
     }, opts || {});
 
     const root = document.querySelector(cfg.rootSelector);
