@@ -339,7 +339,7 @@ class Sample_viewer{
       msCount: 16,
       rgbCount: 3,
       // autoplay speeds (ms)
-      msInterval: 1500,
+      msInterval: 1800,
       rgbInterval: 1800
     }, opts || {});
 
