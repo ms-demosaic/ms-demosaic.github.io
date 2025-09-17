@@ -295,3 +295,21 @@ body {
 #dataset-viewer .ds-pill { background:#e2e8f0; border-radius:999px; padding:2px 8px; font-size:.8rem; }
 @media (max-width: 900px) { #dataset-viewer .ds-grid { grid-template-columns: 1fr; } }
 
+#scenes-overview .so-stage{
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1080 / 736;    /* key line */
+}
+
+#scenes-overview .so-img{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;         /* or 'cover' if you prefer */
+  opacity: 0; transition: opacity 320ms ease;
+}
+#scenes-overview .so-img.is-active{ opacity: 1; }
+
+@media (prefers-reduced-motion: reduce){
+  #scenes-overview .so-img{ transition: none; }
+}
+

@@ -492,4 +492,109 @@ class Sample_viewer{
   window.initDatasetViewer = initDatasetViewer;
 })();
 
+// === Scenes overview carousel: 28 samples, autoplay 1800ms ===
+(function () {
+  function pad2(n){ return String(n).padStart(2, '0'); }
+
+  function initScenesOverview(opts){
+    const cfg = Object.assign({
+      root: '#scenes-overview',
+      imgId: '#so-image',
+      indicatorId: '#so-indicator',
+      prevId: '#so-prev', playId: '#so-play', pauseId: '#so-pause', nextId: '#so-next',
+      base: 'assets/dataset/smaples',
+      pattern: '{nn}.webp',
+      count: 28,
+      interval: 3000
+    }, opts || {});
+
+    const root = document.querySelector(cfg.root);
+    if (!root) return;
+
+    //const img = root.querySelector(cfg.imgId);
+    const btnPrev  = root.querySelector(cfg.prevId);
+    const btnPlay  = root.querySelector(cfg.playId);
+    const btnPause = root.querySelector(cfg.pauseId);
+    const btnNext  = root.querySelector(cfg.nextId);
+
+    const imgA = root.querySelector('#so-a');
+    const imgB = root.querySelector('#so-b');
+    const ind  = root.querySelector(cfg.indicatorId);
+
+    let idx = 1;
+    let timer = null;
+    let showingA = true; // 
+
+    function srcFor(i){
+      const nn = pad2(i);
+      const base = cfg.base.endsWith('/') ? cfg.base.slice(0, -1) : cfg.base;
+      return `${base}/${cfg.pattern.replace('{nn}', nn)}`;
+    }
+
+
+    function set(i){
+      if (i < 1) i = cfg.count;
+      if (i > cfg.count) i = 1;
+      idx = i;
+
+      const url = srcFor(idx);
+      const cur = showingA ? imgA : imgB;
+      const nxt = showingA ? imgB : imgA;
+
+      // load next image offscreen, then fade it in
+      nxt.onload = () => {
+        // preload the following frame for smoothness
+        const pre = new Image();
+        pre.src = srcFor(idx === cfg.count ? 1 : idx + 1);
+
+        nxt.classList.add('is-active');
+        cur.classList.remove('is-active');
+
+        nxt.alt = `Scene ${idx} sample`;
+        if (ind) ind.textContent = `${idx} / ${cfg.count}`;
+
+        showingA = !showingA;
+        nxt.onload = null; // cleanup
+      };
+
+      // start loading the next frame (may hit cache instantly)
+      nxt.src = url;
+    }
+
+    function step(d){ set(idx + d); }
+    function play(){ pause(); timer = setInterval(() => step(+1), cfg.interval); }
+    function pause(){ if (timer) clearInterval(timer); timer = null; }
+
+    btnPrev?.addEventListener('click', () => step(-1));
+    btnNext?.addEventListener('click', () => step(+1));
+    btnPlay?.addEventListener('click', play);
+    btnPause?.addEventListener('click', pause);
+
+    // Optional keyboard: ←/→ to navigate, space to toggle
+    document.addEventListener('keydown', (e) => {
+      const tag = (document.activeElement?.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      if (!root.isConnected) return;
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); step(-1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); step(+1); }
+      if (e.key === ' ')          { e.preventDefault(); timer ? pause() : play(); }
+    });
+
+    // init
+    set(1);
+    play(); // start autoplay
+    return { set, next:()=>step(+1), prev:()=>step(-1), play, pause };
+  }
+
+  // call after DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    initScenesOverview({
+      // if you converted images, switch pattern to 's{nn}.webp'
+      // base: 'assets/scenes_overview', pattern: 's{nn}.webp',
+      interval: 1800, count: 28
+    });
+  });
+})();
+
+
 
