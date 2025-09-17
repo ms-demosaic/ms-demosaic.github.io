@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gt:      'Ground Truth'
       },
       deepLinkKey: 'qualScene'   // keeps your existing links working
-    });
+      });
 
     // Block 2: *_full (new)
     initQualSceneSwitcher({
@@ -132,8 +132,34 @@ document.addEventListener('DOMContentLoaded', () => {
         gt:      'Ground Truth'
       },
       deepLinkKey: 'qualScene2'  // separate URL param for this block
+      });
+    });
+
+  document.addEventListener('DOMContentLoaded', () => {
+  initDatasetViewer({
+    base: 'assets/dataset',     // adjust to your folder
+    scenes: [
+      { id: 's1', label: 'Scene 1' },
+      { id: 's2', label: 'Scene 2' },
+      { id: 's3', label: 'Scene 3' },
+      { id: 's4', label: 'Scene 4' },
+      { id: 's5', label: 'Scene 5' }
+    ],
+    files: {
+      // change these names to match your export
+      msChannelPattern:  'ms_channel_{ch}.png',
+      msMosaic:          'ms_mosaic.png',
+      msSRGB:            'ms_view1_srgb.png',
+      rgbChannelPattern: 'rgb_view2_channel_{ch}.png',
+      rgbMosaic:         'rgb_view2_mosaic.png',
+      rgbSRGB:           'rgb_view2_srgb.png',
+      thumb:             'ms_view1_srgb.png'
+    },
+    msInterval: 1000,  // autoplay speeds
+    rgbInterval: 1500
     });
   });
+
 
 </script>
 <body>
@@ -499,6 +525,81 @@ document.addEventListener('DOMContentLoaded', () => {
 </section>
 
 
+<section class="hero teaser" id="dataset-viewer">
+  <div class="hero-body">
+    <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
+    <br/>
+      <h2 class="title">Dataset Visualization</h2>
+      <p class="content">
+        Explore sample scenes with multispectral (MS) and RGB data. Left panels cycle through channels (MS×16, RGB×3) with play/pause and step controls; middle panels show mosaics; right panels show sRGB visualizations.
+      </p>
+
+      <!-- Scene selector -->
+      <div class="card" style="border-radius:1em; padding:1em; margin:1rem 0;">
+        <h5 style="text-align:left; margin-bottom:.5rem;">Scene Selection</h5>
+        <div id="ds-scene-selector" style="display:flex; flex-wrap:wrap; gap:.5rem; justify-content:space-evenly;"></div>
+      </div>
+
+      <!-- 3×2 grid -->
+      <div class="ds-grid">
+        <!-- MS: channels -->
+        <figure class="ds-card">
+          <img id="ds-ms-channel" alt="MS channel frame" loading="lazy">
+          <figcaption>
+            <strong>MS channels</strong>
+            <span id="ds-ms-indicator" class="ds-pill">1 / 16</span>
+            <div class="ds-controls">
+              <button class="ds-btn" id="ds-ms-prev"  aria-label="Previous MS channel">◀</button>
+              <button class="ds-btn" id="ds-ms-play"  aria-label="Play MS channels">▶</button>
+              <button class="ds-btn" id="ds-ms-pause" aria-label="Pause MS channels">⏸</button>
+              <button class="ds-btn" id="ds-ms-next"  aria-label="Next MS channel">▶</button>
+            </div>
+          </figcaption>
+        </figure>
+
+        <!-- MS: mosaic -->
+        <figure class="ds-card">
+          <img id="ds-ms-mosaic" alt="MS mosaic" loading="lazy">
+          <figcaption><strong>MS mosaic</strong></figcaption>
+        </figure>
+
+        <!-- MS: sRGB -->
+        <figure class="ds-card">
+          <img id="ds-ms-srgb" alt="MS sRGB visualization" loading="lazy">
+          <figcaption><strong>MS sRGB</strong></figcaption>
+        </figure>
+
+        <!-- RGB: channels -->
+        <figure class="ds-card">
+          <img id="ds-rgb-channel" alt="RGB channel frame" loading="lazy">
+          <figcaption>
+            <strong>RGB channels</strong>
+            <span id="ds-rgb-indicator" class="ds-pill">1 / 3</span>
+            <div class="ds-controls">
+              <button class="ds-btn" id="ds-rgb-prev"  aria-label="Previous RGB channel">◀</button>
+              <button class="ds-btn" id="ds-rgb-play"  aria-label="Play RGB channels">▶</button>
+              <button class="ds-btn" id="ds-rgb-pause" aria-label="Pause RGB channels">⏸</button>
+              <button class="ds-btn" id="ds-rgb-next"  aria-label="Next RGB channel">▶</button>
+            </div>
+          </figcaption>
+        </figure>
+
+        <!-- RGB: mosaic -->
+        <figure class="ds-card">
+          <img id="ds-rgb-mosaic" alt="RGB mosaic" loading="lazy">
+          <figcaption><strong>RGB mosaic</strong></figcaption>
+        </figure>
+
+        <!-- RGB: sRGB -->
+        <figure class="ds-card">
+          <img id="ds-rgb-srgb" alt="RGB sRGB visualization" loading="lazy">
+          <figcaption><strong>RGB sRGB</strong></figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
 
 <!-- <section class="hero teaser">
   <div class="hero-body">
@@ -513,7 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="row">
       <div class="col-2" style='flex:0 0 25%;max-width:25%;'>
         <a  href="assets/images/dataset/Figures_dataset3.pdf"><img style='width:60%; border-radius: 25%;' src="assets/icons/novel/s3.jpg"></a>
-        <!-- <br><a href="assets/images/dataset/Figures_dataset3.pdf">Scene 1</a> -->
+        <br><a href="assets/images/dataset/Figures_dataset3.pdf">Scene 1</a> -->
       <!-- </div>
       <div class="col-2" style='flex:0 0 25%;max-width:25%;'>
         <a  href="assets/images/dataset/Figures_dataset18.pdf"><img style='width:60%; border-radius: 25%;' src="assets/icons/novel/s18.jpg"></a> -->

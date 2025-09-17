@@ -276,3 +276,22 @@ body {
 
 /* Small captions under each row (optional) */
 .qual-cap{ margin-top:.4rem; font-size:.95em; color:#555; }
+
+
+#dataset-viewer .ds-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+#dataset-viewer .ds-card {
+  background:#fff; border-radius:14px; overflow:hidden;
+  box-shadow: rgba(0,0,0,.08) 0 8px 20px; margin:0;
+}
+#dataset-viewer .ds-card img { width:100%; height:auto; display:block; }
+#dataset-viewer .ds-card figcaption { padding:.6rem .8rem; display:flex; align-items:center; justify-content:space-between; gap:.5rem; flex-wrap:wrap; }
+#dataset-viewer .ds-controls { display:flex; gap:.25rem; }
+#dataset-viewer .ds-btn { border:1px solid #cbd5e1; background:#fff; border-radius:8px; padding:.25rem .45rem; cursor:pointer; }
+#dataset-viewer .ds-btn:hover { background:#f1f5f9; }
+#dataset-viewer .ds-pill { background:#e2e8f0; border-radius:999px; padding:2px 8px; font-size:.8rem; }
+@media (max-width: 900px) { #dataset-viewer .ds-grid { grid-template-columns: 1fr; } }
+

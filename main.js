@@ -306,5 +306,190 @@ class Sample_viewer{
 })();
 
 
-// create the viewer here to make it global, and accessible from the HTML
+// ===================== Dataset Viewer =====================
+(function () {
+  function pad(n, width=2) { return String(n).padStart(width, '0'); }
+
+  /**
+   * Initialize dataset viewer (scene selector + two carousels + four statics).
+   * @param {Object} opts - see defaults below and override to match your paths.
+   */
+  function initDatasetViewer(opts) {
+    const cfg = Object.assign({
+      rootSelector: '#dataset-viewer',
+      selectorId: 'ds-scene-selector',
+      base: 'assets/dataset',    // folder containing scene subfolders
+      scenes: [                  // 5 scenes (update to match your folders)
+        { id: 's1', label: 'Scene 1' },
+        { id: 's2', label: 'Scene 2' },
+        { id: 's3', label: 'Scene 3' },
+        { id: 's4', label: 'Scene 4' },
+        { id: 's5', label: 'Scene 5' },
+      ],
+      files: {
+        // patterns (replace {ch})
+			msChannelPattern:  'ms_channel_{ch}.png',
+			msMosaic:          'ms_mosaic.png',
+			msSRGB:            'ms_view1_srgb.png',
+			rgbChannelPattern: 'rgb_view2_channel_{ch}.png',
+			rgbMosaic:         'rgb_view2_mosaic.png',
+			rgbSRGB:           'rgb_view2_srgb.png',
+			thumb:             'ms_view1_srgb.png'
+      },
+      msCount: 16,
+      rgbCount: 3,
+      // autoplay speeds (ms)
+      msInterval: 1000,
+      rgbInterval: 1100
+    }, opts || {});
+
+    const root = document.querySelector(cfg.rootSelector);
+    if (!root) return;
+
+    const selector = root.querySelector('#' + cfg.selectorId);
+    const el = {
+      msImg:   root.querySelector('#ds-ms-channel'),
+      msMos:   root.querySelector('#ds-ms-mosaic'),
+      msSRGB:  root.querySelector('#ds-ms-srgb'),
+      rgbImg:  root.querySelector('#ds-rgb-channel'),
+      rgbMos:  root.querySelector('#ds-rgb-mosaic'),
+      rgbSRGB: root.querySelector('#ds-rgb-srgb'),
+      msIdx:   root.querySelector('#ds-ms-indicator'),
+      rgbIdx:  root.querySelector('#ds-rgb-indicator'),
+    };
+    const btn = {
+      msPrev:  root.querySelector('#ds-ms-prev'),
+      msPlay:  root.querySelector('#ds-ms-play'),
+      msPause: root.querySelector('#ds-ms-pause'),
+      msNext:  root.querySelector('#ds-ms-next'),
+      rgbPrev:  root.querySelector('#ds-rgb-prev'),
+      rgbPlay:  root.querySelector('#ds-rgb-play'),
+      rgbPause: root.querySelector('#ds-rgb-pause'),
+      rgbNext:  root.querySelector('#ds-rgb-next'),
+    };
+
+    let state = {
+      scene: cfg.scenes[0].id,
+      msIdx: 1,
+      rgbIdx: 1,
+      msTimer: null,
+      rgbTimer: null
+    };
+
+    function path(sceneId, file) {
+      return `${cfg.base}/${sceneId}/${file}`;
+    }
+    function pathMs(sceneId, ch) {
+	  const idx0 = ch - 1;                 // 1..16  ->  0..15
+      return path(sceneId, cfg.files.msChannelPattern.replace('{ch}', pad(idx0, 2)));
+    }
+    function pathRgb(sceneId, ch) {
+      const idx0 = ch - 1;                 // 1..3  ->  0..2
+  	  return path(sceneId, cfg.files.msChannelPattern.replace('{ch}', pad(idx0, 2)));
+    }
+
+    function setScene(sceneId) {
+      state.scene = sceneId;
+      state.msIdx = 1; state.rgbIdx = 1;
+      // statics
+      el.msMos.src   = path(sceneId, cfg.files.msMosaic);
+      el.msSRGB.src  = path(sceneId, cfg.files.msSRGB);
+      el.rgbMos.src  = path(sceneId, cfg.files.rgbMosaic);
+      el.rgbSRGB.src = path(sceneId, cfg.files.rgbSRGB);
+      // channels
+      el.msImg.src   = pathMs(sceneId, state.msIdx);
+      el.rgbImg.src  = pathRgb(sceneId, state.rgbIdx);
+      updateIndicators();
+      highlightActive();
+    }
+
+    function updateIndicators() {
+      if (el.msIdx)  el.msIdx.textContent  = `${state.msIdx} / ${cfg.msCount}`;
+      if (el.rgbIdx) el.rgbIdx.textContent = `${state.rgbIdx} / ${cfg.rgbCount}`;
+    }
+
+    function highlightActive() {
+      selector?.querySelectorAll('button[data-scene]').forEach(b => {
+        const active = b.dataset.scene === state.scene;
+        b.classList.toggle('is-link', active);
+        b.classList.toggle('is-light', !active);
+        b.setAttribute('aria-pressed', String(active));
+      });
+    }
+
+    function msStep(dir) {
+      state.msIdx += dir;
+      if (state.msIdx < 1) state.msIdx = cfg.msCount;
+      if (state.msIdx > cfg.msCount) state.msIdx = 1;
+      el.msImg.src = pathMs(state.scene, state.msIdx);
+      updateIndicators();
+    }
+    function rgbStep(dir) {
+      state.rgbIdx += dir;
+      if (state.rgbIdx < 1) state.rgbIdx = cfg.rgbCount;
+      if (state.rgbIdx > cfg.rgbCount) state.rgbIdx = 1;
+      el.rgbImg.src = pathRgb(state.scene, state.rgbIdx);
+      updateIndicators();
+    }
+
+    function msPlay() { msPause(); state.msTimer = setInterval(() => msStep(+1), cfg.msInterval); }
+    function msPause() { if (state.msTimer) clearInterval(state.msTimer); state.msTimer = null; }
+    function rgbPlay() { rgbPause(); state.rgbTimer = setInterval(() => rgbStep(+1), cfg.rgbInterval); }
+    function rgbPause() { if (state.rgbTimer) clearInterval(state.rgbTimer); state.rgbTimer = null; }
+
+    function buildSelector() {
+      if (!selector) return;
+      selector.innerHTML = '';
+      cfg.scenes.forEach(sc => {
+        const btnEl = document.createElement('button');
+        btnEl.type = 'button';
+        btnEl.className = 'button is-small is-light';
+        btnEl.dataset.scene = sc.id;
+        // small rectangular thumb (cropped)
+        btnEl.style.margin = '.25rem'; btnEl.style.padding = '0';
+        btnEl.style.borderRadius = '5%'; btnEl.style.overflow = 'hidden';
+        btnEl.style.width = '120px'; btnEl.style.height = '70px';
+
+        const img = new Image();
+        img.src = path(sc.id, cfg.files.thumb);
+        img.alt = sc.label; img.loading = 'lazy';
+        img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
+        img.style.borderRadius = '5%';
+
+        btnEl.appendChild(img);
+        btnEl.addEventListener('click', () => setScene(sc.id));
+        selector.appendChild(btnEl);
+      });
+    }
+
+    // wire controls
+    btn.msPrev?.addEventListener('click', () => msStep(-1));
+    btn.msNext?.addEventListener('click', () => msStep(+1));
+    btn.msPlay?.addEventListener('click', msPlay);
+    btn.msPause?.addEventListener('click', msPause);
+
+    btn.rgbPrev?.addEventListener('click', () => rgbStep(-1));
+    btn.rgbNext?.addEventListener('click', () => rgbStep(+1));
+    btn.rgbPlay?.addEventListener('click', rgbPlay);
+    btn.rgbPause?.addEventListener('click', rgbPause);
+
+    // init
+    buildSelector();
+    setScene(state.scene);
+    // start autoplay (optional: comment out one or both)
+    msPlay();
+    rgbPlay();
+
+    // expose if needed
+    return {
+      setScene, msPlay, msPause, rgbPlay, rgbPause,
+      nextMs: () => msStep(+1), prevMs: () => msStep(-1),
+      nextRgb: () => rgbStep(+1), prevRgb: () => rgbStep(-1),
+      state, config: cfg
+    };
+  }
+
+  window.initDatasetViewer = initDatasetViewer;
+})();
+
 
