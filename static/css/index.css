@@ -293,6 +293,47 @@ body {
 #dataset-viewer .ds-btn { border:1px solid #cbd5e1; background:#fff; border-radius:8px; padding:.25rem .45rem; cursor:pointer; }
 #dataset-viewer .ds-btn:hover { background:#f1f5f9; }
 #dataset-viewer .ds-pill { background:#e2e8f0; border-radius:999px; padding:2px 8px; font-size:.8rem; }
+
+/* controls styling (reuses Scenes Overview styles if you already have them) */
+#dataset-viewer .so-controls { display:flex; gap:.35rem; align-items:center; }
+#dataset-viewer .so-btn {
+  border:1px solid #cbd5e1; background:#fff; border-radius:8px; padding:.25rem .55rem;
+  line-height:1; cursor:pointer;
+}
+#dataset-viewer .so-btn--circle { width:36px; height:36px; border-radius:999px; display:grid; place-items:center; }
+#dataset-viewer .so-btn--primary { background:#111; color:#fff; border-color:#111; }
+#dataset-viewer .so-btn:hover { background:#f1f5f9; }
+#dataset-viewer .so-btn--primary:hover { background:#000; }
+#dataset-viewer .so-pill { background:#e2e8f0; border-radius:999px; padding:2px 10px; font-size:.85rem; }
+
+/* dark-room stage */
+#dataset-viewer .ds-darkroom-stage{
+  position: relative;
+  background: #000;                 /* dark room */
+  aspect-ratio: 1080 / 736;         /* adjust if your images differ */
+  overflow: visible;                 /* let glow spill out */
+  --glow: #fff;                      /* updated from JS per frame */
+}
+
+/* center the image; fade between A/B; apply glow only when "is-lit" */
+#dataset-viewer .ds-darkroom-img{
+  position:absolute; inset:0; margin:auto;
+  max-width: 80%; max-height: 75%;  /* keeps some black border around */
+  width:auto; height:auto;           /* preserve native ratio */
+  border-radius:12px;
+  opacity:0; transition: opacity 700ms ease;
+}
+#dataset-viewer .ds-darkroom-img.is-active{ opacity:1; }
+#dataset-viewer .ds-darkroom-img.is-lit{
+  filter:
+    drop-shadow(0 0 34px var(--glow))
+    drop-shadow(0 0 110px var(--glow));
+}
+
+@media (prefers-reduced-motion: reduce){
+  #dataset-viewer .ds-darkroom-img{ transition:none; }
+}
+
 @media (max-width: 900px) { #dataset-viewer .ds-grid { grid-template-columns: 1fr; } }
 
 #scenes-overview .so-stage{
@@ -331,3 +372,4 @@ body {
   max-width: 100%;
   max-height: 100%;  }
 }
+

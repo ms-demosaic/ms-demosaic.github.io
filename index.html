@@ -135,9 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-  document.addEventListener('DOMContentLoaded', () => {
-  initDatasetViewer({
-    base: 'assets/dataset',     // adjust to your folder
+document.addEventListener('DOMContentLoaded', () => {
+  const ds = initDatasetViewer({
+    base: 'assets/dataset',
     scenes: [
       { id: 's1', label: 'Scene 1' },
       { id: 's2', label: 'Scene 2' },
@@ -146,19 +146,24 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 's5', label: 'Scene 5' }
     ],
     files: {
-      // change these names to match your export
+      // your current names
       msChannelPattern:  'ms_channel_{ch}.webp',
       msMosaic:          'ms_mosaic.webp',
       msSRGB:            'ms_view1_srgb.webp',
       rgbChannelPattern: 'rgb_view2_channel_{ch}.webp',
       rgbMosaic:         'rgb_view2_mosaic.webp',
-      rgbSRGB:           'rgb_view2_srgb.webp',
+      rgbSRGB:           'rgb_view2_srgb.webp',   // D65 for the dark-room last frame
       thumb:             'ms_view1_srgb.webp'
     },
-    msInterval: 1800,  // autoplay speeds
+    msInterval: 1800,
     rgbInterval: 1800
-    });
   });
+
+  // hook up the Dark-Room Illumination Sweep to follow the selected scene
+  if (window.__bindDarkroomToDataset && ds) {
+    window.__bindDarkroomToDataset(ds);
+  }
+});
 
 
 </script>
@@ -596,6 +601,27 @@ document.addEventListener('DOMContentLoaded', () => {
           <figcaption><strong>RGB sRGB</strong></figcaption>
         </figure>
       </div>
+    
+
+          <!-- Dark-Room Illumination Sweep -->
+      <div class="card ds-darkroom-card" style="border-radius:1em; overflow:visible; margin-top:1rem;">
+        <h5 style="text-align:left; padding:0.8rem 1rem 0;">Illumination Sweep</h5>
+
+        <div id="ds-darkroom-stage" class="ds-darkroom-stage">
+          <img id="ds-dark-a" class="ds-darkroom-img is-active" alt="">
+          <img id="ds-dark-b" class="ds-darkroom-img" alt="">
+        </div>
+
+        <div class="p-3" style="display:flex; align-items:center; justify-content:space-between; gap:.5rem; flex-wrap:wrap;">
+          <div class="so-controls">
+            <button class="so-btn so-btn--step"   id="ds-dark-prev"   aria-label="Previous (←)">⏮</button>
+            <button class="so-btn so-btn--primary so-btn--circle" id="ds-dark-toggle" aria-pressed="true" aria-label="Pause (Space)">⏸</button>
+            <button class="so-btn so-btn--step"   id="ds-dark-next"   aria-label="Next (→)">⏭</button>
+          </div>
+          <span id="ds-dark-indicator" class="so-pill">1 / 8</span>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
