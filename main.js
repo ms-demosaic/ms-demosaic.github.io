@@ -963,37 +963,40 @@
       illumPattern: 'i{n}.webp',     // i1..i7.webp
       msDark: 'ms_channel_00.webp',  // dark transition image
       rgbSRGB: 'rgb_srgb.webp',      // D65 image
-      litMs: 3600,
-      darkMs: 800,
-      // Lights (in your order): Violet, Royal Blue, Blue, Green, Yellow, Amber, Deep Red
+      litMs: 3800,
+      darkMs: 900,
+      // Lights in order: Violet, Royal Blue, Blue, Green, Yellow, Amber, Deep Red
       lightLabels: ['Violet','Royal Blue','Blue','Green','Yellow','Amber','Deep Red'],
-      glows: ['#3b06fbff', '#3462ebff', '#1E90FF', '#2ECC71', '#e7d47dff', '#FF8F00', '#C81D25'],
+      glows: ['#3B06FB','#3462EB','#1E90FF','#2ECC71','#E7D47D','#FF8F00','#C81D25'],
       glowD65: '#FFFFFF'
     }, opts || {});
 
-    const stage = document.querySelector('#ds-darkroom-stage');
-    const a = document.querySelector('#ds-dark-a');
-    const b = document.querySelector('#ds-dark-b');
-    const btnPrev   = document.querySelector('#ds-dark-prev');
-    const btnNext   = document.querySelector('#ds-dark-next');
-    const btnToggle = document.querySelector('#ds-dark-toggle');
+    // elements
+    const stage   = document.querySelector('#ds-darkroom-stage');
+    const a       = document.querySelector('#ds-dark-a');
+    const b       = document.querySelector('#ds-dark-b');
+    const btnPrev = document.querySelector('#ds-dark-prev');
+    const btnNext = document.querySelector('#ds-dark-next');
+    const btnPlay = document.querySelector('#ds-dark-play');
+    const btnPause= document.querySelector('#ds-dark-pause');
     const indicator = document.querySelector('#ds-dark-indicator');
     if (!stage || !a || !b) return null;
 
+    // state
     let scene = 's1';
-    let showingA = true;
+    let showingA = true;   // which <img> is visible
     let litIndex = 0;      // 0..7 (i1..i7, then D65)
     let phase = 'dark';    // 'dark' | 'lit'
     let timer = null;
 
-    function baseScenePath(id){ return `${slashSafe(cfg.base)}/${id}`; }
-    function srcIllum(id,k){
-      if (k < 7) return `${baseScenePath(id)}/${cfg.illumPattern.replace('{n}', String(k+1))}`;
-      return `${baseScenePath(id)}/${cfg.rgbSRGB}`; // D65
-    }
-    function srcDark(id){ return `${baseScenePath(id)}/${cfg.msDark}`; }
-    function glowFor(k){ return (k < 7) ? cfg.glows[k] : cfg.glowD65; }
-    function labelFor(k){ return (k < 7) ? cfg.lightLabels[k] : 'D65'; }
+    // helpers
+    const baseScenePath = id => `${slashSafe(cfg.base)}/${id}`;
+    const srcIllum = (id,k) => k < 7
+      ? `${baseScenePath(id)}/${cfg.illumPattern.replace('{n}', String(k+1))}`
+      : `${baseScenePath(id)}/${cfg.rgbSRGB}`;
+    const srcDark  = id => `${baseScenePath(id)}/${cfg.msDark}`;
+    const glowFor  = k => (k < 7 ? cfg.glows[k] : cfg.glowD65);
+    const labelFor = k => (k < 7 ? cfg.lightLabels[k] : 'D65');
 
     function swap(url, {lit=false, idx=null}={}){
       const cur = showingA ? a : b;
@@ -1009,9 +1012,9 @@
       };
       nxt.src = url;
 
-      // Label in the indicator: "<Light Name> (N / 8)" on lit frames, "Dark" on transition
-      if (indicator){
-        indicator.textContent = lit && idx!=null ? `${labelFor(idx)} (${idx+1} / 8)` : 'Dark';
+      // Update label ONLY on lit frames (keep previous during dark)
+      if (indicator && lit && idx != null) {
+        indicator.textContent = `${labelFor(idx)} (${idx+1} / 8)`;
       }
     }
 
@@ -1029,36 +1032,43 @@
       }
     }
 
-    function play(){ pause(); step(); updateToggle(); }
-    function pause(){ if (timer) clearTimeout(timer); timer = null; updateToggle(); }
+    function play(){ pause(); step(); }
+    function pause(){ if (timer) clearTimeout(timer); timer = null; }
     function isPlaying(){ return !!timer; }
-    function updateToggle(){
-      if (!btnToggle) return;
-      btnToggle.textContent = isPlaying() ? '⏸' : '▶';
-      btnToggle.setAttribute('aria-pressed', String(isPlaying()));
-      btnToggle.setAttribute('aria-label', isPlaying() ? 'Pause (Space)' : 'Play (Space)');
-    }
 
     function resetForScene(id){
       scene = id;
       pause();
       showingA = true; litIndex = 0; phase = 'dark';
-      swap(srcDark(scene), {lit:false});
+      swap(srcDark(scene), {lit:false});                  // show dark frame
+      if (indicator) indicator.textContent = `${labelFor(0)} (1 / 8)`; // seed label
     }
 
-    btnPrev && btnPrev.addEventListener('click', () => {
+    // controls
+    btnPrev?.addEventListener('click', () => {
       pause(); phase='dark';
-      litIndex = (litIndex + 7) % 8;
+      litIndex = (litIndex + 7) % 8; // previous lit frame
       swap(srcIllum(scene, litIndex), {lit:true, idx:litIndex});
     });
-    btnNext && btnNext.addEventListener('click', () => {
+    btnNext?.addEventListener('click', () => {
       pause(); phase='dark';
-      litIndex = (litIndex + 1) % 8;
+      litIndex = (litIndex + 1) % 8; // next lit frame
       swap(srcIllum(scene, litIndex), {lit:true, idx:litIndex});
     });
-    btnToggle && btnToggle.addEventListener('click', () => (isPlaying() ? pause() : play()));
+    btnPlay?.addEventListener('click', play);
+    btnPause?.addEventListener('click', pause);
 
-    // stay in sync with dataset viewer (from earlier events)
+    // keyboard like Scenes Overview: ←/→ and Space
+    document.addEventListener('keydown', (e) => {
+      const tag = (document.activeElement?.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      if (!stage.isConnected) return;
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); btnPrev?.click(); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); btnNext?.click(); }
+      if (e.key === ' ')          { e.preventDefault(); (isPlaying() ? pause() : play()); }
+    });
+
+    // stay in sync with dataset viewer (via event)
     document.addEventListener('dataset:scenechange', (e) => {
       const id = e.detail?.sceneId;
       if (!id) return;
@@ -1067,23 +1077,23 @@
       if (was) play();
     });
 
+    // init (no autoplay here; we start it when viewer is ready)
     resetForScene(scene);
-    updateToggle();
     return { resetForScene, play, pause, isPlaying, config: cfg };
   }
 
-  // Auto-init when dataset viewer is ready
+  // Auto-init when dataset viewer is ready (and start autoplay)
   document.addEventListener('dataset:viewer-ready', (e) => {
     const ds = e.detail?.instance;
     if (!ds) return;
-    initDarkroom({
+    const dr = initDarkroom({
       base: ds.config?.base || 'assets/dataset',
       rgbSRGB: ds.config?.files?.rgbSRGB || 'rgb_srgb.webp'
     });
-    if (dr) dr.play();  
+    if (dr) dr.play();   // autoplay
   });
 
-  // Optional manual binder stays available
+  // Optional manual binder
   window.__bindDarkroomToDataset = function(ds){
     if (!ds) return;
     const dr = initDarkroom({
@@ -1091,7 +1101,7 @@
       rgbSRGB: ds.config?.files?.rgbSRGB || 'rgb_srgb.webp'
     });
     if (!dr) return;
-    dr.play();    
+    dr.play(); // autoplay
 
     if (typeof ds.setScene === 'function'){
       const original = ds.setScene.bind(ds);
