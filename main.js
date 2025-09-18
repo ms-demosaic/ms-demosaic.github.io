@@ -505,7 +505,7 @@ class Sample_viewer{
       base: 'assets/dataset/smaples',
       pattern: '{nn}.webp',
       count: 28,
-      interval: 3000
+      interval: 4000
     }, opts || {});
 
     const root = document.querySelector(cfg.root);
@@ -591,7 +591,7 @@ class Sample_viewer{
     initScenesOverview({
       // if you converted images, switch pattern to 's{nn}.webp'
       // base: 'assets/scenes_overview', pattern: 's{nn}.webp',
-      interval: 1800, count: 28
+      interval: 4000, count: 28
     });
   });
 })();
