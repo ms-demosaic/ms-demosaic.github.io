@@ -676,9 +676,10 @@
 })();
 
 
-// ===================== Dataset Viewer =====================
+// ===================== Dataset Viewer (robust) =====================
 (function () {
-  function pad(n, width=2) { return String(n).padStart(width, '0'); }
+  function pad(n, width = 2) { return String(n).padStart(width, '0'); }
+  const lights = ['Violet','Royal Blue','Blue','Green','Yellow','Amber','Deep Red','D65'];
 
   function initDatasetViewer(opts) {
     const cfg = Object.assign({
@@ -690,22 +691,31 @@
         { id: 's2', label: 'Scene 2' },
         { id: 's3', label: 'Scene 3' },
         { id: 's4', label: 'Scene 4' },
-        { id: 's5', label: 'Scene 5' },
+        { id: 's5', label: 'Scene 5' }
       ],
-      files: {
-        msChannelPattern:  'ms_channel_{ch}.webp',
-        msMosaic:          'ms_mosaic.webp',
-        msSRGB:            'ms_view1_srgb.webp',
-        rgbChannelPattern: 'rgb_view2_channel_{ch}.webp',
-        rgbMosaic:         'rgb_view2_mosaic.webp',
-        rgbSRGB:           'rgb_view2_srgb.webp',
-        thumb:             'ms_view1_srgb.webp'
-      },
+      files: {},
       msCount: 16,
       rgbCount: 3,
       msInterval: 1800,
       rgbInterval: 1800
     }, opts || {});
+
+    // Normalize file names / patterns
+    const F = cfg.files = Object.assign({
+      msChannelPattern:  'ms_channel_{ch}.webp',
+      msMosaic:          'ms_mosaic.webp',
+      msSRGB:            'ms_view1_srgb.webp',
+      rgbChannelPattern: 'rgb_view2_channel_{ch}.webp',
+      rgbMosaic:         'rgb_view2_mosaic.webp',
+      rgbSRGB:           'rgb_view2_srgb.webp',
+      thumb:             'ms_view1_srgb.webp',
+      msSrgbIllumPattern:  'i{n}.webp',   // i1..i7.webp
+      rgbSrgbIllumPattern: 'j{n}.webp'    // j1..j7.webp
+    }, cfg.files || {});
+
+    function safeReplace(str, token, value) {
+      return (typeof str === 'string') ? str.replace(token, value) : '';
+    }
 
     const root = document.querySelector(cfg.rootSelector);
     if (!root) return;
@@ -718,61 +728,89 @@
       rgbImg:  root.querySelector('#ds-rgb-channel'),
       rgbMos:  root.querySelector('#ds-rgb-mosaic'),
       rgbSRGB: root.querySelector('#ds-rgb-srgb'),
-      msIdx:   root.querySelector('#ds-ms-indicator'),
-      rgbIdx:  root.querySelector('#ds-rgb-indicator'),
+      msIdx:        root.querySelector('#ds-ms-indicator'),
+      rgbIdx:       root.querySelector('#ds-rgb-indicator'),
+      msSrgbIdx:    root.querySelector('#ds-ms-srgb-indicator'),
+      rgbSrgbIdx:   root.querySelector('#ds-rgb-srgb-indicator')
     };
+
     const btn = {
-      msPrev:  root.querySelector('#ds-ms-prev'),
-      msPlay:  root.querySelector('#ds-ms-play'),
-      msPause: root.querySelector('#ds-ms-pause'),
-      msNext:  root.querySelector('#ds-ms-next'),
+      msPrev:   root.querySelector('#ds-ms-prev'),
+      msPlay:   root.querySelector('#ds-ms-play'),
+      msPause:  root.querySelector('#ds-ms-pause'),
+      msNext:   root.querySelector('#ds-ms-next'),
       rgbPrev:  root.querySelector('#ds-rgb-prev'),
       rgbPlay:  root.querySelector('#ds-rgb-play'),
       rgbPause: root.querySelector('#ds-rgb-pause'),
       rgbNext:  root.querySelector('#ds-rgb-next'),
+      msSrgbPrev:   root.querySelector('#ds-ms-srgb-prev'),
+      msSrgbPlay:   root.querySelector('#ds-ms-srgb-play'),
+      msSrgbPause:  root.querySelector('#ds-ms-srgb-pause'),
+      msSrgbNext:   root.querySelector('#ds-ms-srgb-next'),
+      rgbSrgbPrev:  root.querySelector('#ds-rgb-srgb-prev'),
+      rgbSrgbPlay:  root.querySelector('#ds-rgb-srgb-play'),
+      rgbSrgbPause: root.querySelector('#ds-rgb-srgb-pause'),
+      rgbSrgbNext:  root.querySelector('#ds-rgb-srgb-next')
     };
 
     let state = {
       scene: cfg.scenes[0].id,
-      msIdx: 1,
-      rgbIdx: 1,
-      msTimer: null,
-      rgbTimer: null
+      msIdx: 1, rgbIdx: 1,
+      msTimer: null, rgbTimer: null,
+      msSrgbIdx: 1, rgbSrgbIdx: 1,
+      msSrgbTimer: null, rgbSrgbTimer: null
     };
 
-    function path(sceneId, file) {
-      return `${cfg.base}/${sceneId}/${file}`;
-    }
+    // Paths
+    function path(sceneId, file) { return `${cfg.base}/${sceneId}/${file}`; }
     function pathMs(sceneId, ch) {
-      const idx0 = ch - 1;                 // 1..16 -> 0..15
-      return path(sceneId, cfg.files.msChannelPattern.replace('{ch}', pad(idx0, 2)));
+      const idx0 = ch - 1;
+      return path(sceneId, safeReplace(F.msChannelPattern, '{ch}', pad(idx0, 2)));
     }
     function pathRgb(sceneId, ch) {
-      const idx0 = ch - 1;                 // 1..3 -> 0..2
-      return path(sceneId, cfg.files.rgbChannelPattern.replace('{ch}', pad(idx0, 2))); // FIX: use rgbChannelPattern
+      const idx0 = ch - 1;
+      return path(sceneId, safeReplace(F.rgbChannelPattern, '{ch}', pad(idx0, 2)));
+    }
+    function pathMsSrgb(sceneId, idx) {
+      if (idx <= 7 && typeof F.msSrgbIllumPattern === 'string') {
+        return path(sceneId, safeReplace(F.msSrgbIllumPattern, '{n}', String(idx)));
+      }
+      return path(sceneId, F.msSRGB);
+    }
+    function pathRgbSrgb(sceneId, idx) {
+      if (idx <= 7 && typeof F.rgbSrgbIllumPattern === 'string') {
+        return path(sceneId, safeReplace(F.rgbSrgbIllumPattern, '{n}', String(idx)));
+      }
+      return path(sceneId, F.rgbSRGB);
     }
 
+    const lightLabel = (idx) => lights[Math.max(1, Math.min(8, idx)) - 1];
+
+    // Scene switch
     function setScene(sceneId) {
       state.scene = sceneId;
       state.msIdx = 1; state.rgbIdx = 1;
-      // statics
-      el.msMos.src   = path(sceneId, cfg.files.msMosaic);
-      el.msSRGB.src  = path(sceneId, cfg.files.msSRGB);
-      el.rgbMos.src  = path(sceneId, cfg.files.rgbMosaic);
-      el.rgbSRGB.src = path(sceneId, cfg.files.rgbSRGB);
-      // channels
-      el.msImg.src   = pathMs(sceneId, state.msIdx);
-      el.rgbImg.src  = pathRgb(sceneId, state.rgbIdx);
+      state.msSrgbIdx = 1; state.rgbSrgbIdx = 1;
+
+      if (el.msMos)  el.msMos.src  = path(sceneId, F.msMosaic);
+      if (el.rgbMos) el.rgbMos.src = path(sceneId, F.rgbMosaic);
+
+      if (el.msImg)   el.msImg.src   = pathMs(sceneId, state.msIdx);
+      if (el.rgbImg)  el.rgbImg.src  = pathRgb(sceneId, state.rgbIdx);
+      if (el.msSRGB)  el.msSRGB.src  = pathMsSrgb(sceneId, state.msSrgbIdx);
+      if (el.rgbSRGB) el.rgbSRGB.src = pathRgbSrgb(sceneId, state.rgbSrgbIdx);
+
       updateIndicators();
       highlightActive();
 
-      // announce scene change for any listeners (dark-room, etc.)  // FIX: event
       document.dispatchEvent(new CustomEvent('dataset:scenechange', { detail: { sceneId } }));
     }
 
     function updateIndicators() {
-      if (el.msIdx)  el.msIdx.textContent  = `${state.msIdx} / ${cfg.msCount}`;
-      if (el.rgbIdx) el.rgbIdx.textContent = `${state.rgbIdx} / ${cfg.rgbCount}`;
+      if (el.msIdx)      el.msIdx.textContent      = `${state.msIdx} / ${cfg.msCount}`;
+      if (el.rgbIdx)     el.rgbIdx.textContent     = `${state.rgbIdx} / ${cfg.rgbCount}`;
+      if (el.msSrgbIdx)  el.msSrgbIdx.textContent  = lightLabel(state.msSrgbIdx);
+      if (el.rgbSrgbIdx) el.rgbSrgbIdx.textContent = lightLabel(state.rgbSrgbIdx);
     }
 
     function highlightActive() {
@@ -784,25 +822,45 @@
       });
     }
 
+    // Steppers
     function msStep(dir) {
       state.msIdx += dir;
       if (state.msIdx < 1) state.msIdx = cfg.msCount;
       if (state.msIdx > cfg.msCount) state.msIdx = 1;
-      el.msImg.src = pathMs(state.scene, state.msIdx);
+      if (el.msImg) el.msImg.src = pathMs(state.scene, state.msIdx);
       updateIndicators();
     }
     function rgbStep(dir) {
       state.rgbIdx += dir;
       if (state.rgbIdx < 1) state.rgbIdx = cfg.rgbCount;
       if (state.rgbIdx > cfg.rgbCount) state.rgbIdx = 1;
-      el.rgbImg.src = pathRgb(state.scene, state.rgbIdx);
+      if (el.rgbImg) el.rgbImg.src = pathRgb(state.scene, state.rgbIdx);
+      updateIndicators();
+    }
+    function msSrgbStep(dir) {
+      state.msSrgbIdx += dir;
+      if (state.msSrgbIdx < 1) state.msSrgbIdx = 8;
+      if (state.msSrgbIdx > 8) state.msSrgbIdx = 1;
+      if (el.msSRGB) el.msSRGB.src = pathMsSrgb(state.scene, state.msSrgbIdx);
+      updateIndicators();
+    }
+    function rgbSrgbStep(dir) {
+      state.rgbSrgbIdx += dir;
+      if (state.rgbSrgbIdx < 1) state.rgbSrgbIdx = 8;
+      if (state.rgbSrgbIdx > 8) state.rgbSrgbIdx = 1;
+      if (el.rgbSRGB) el.rgbSRGB.src = pathRgbSrgb(state.scene, state.rgbSrgbIdx);
       updateIndicators();
     }
 
-    function msPlay() { msPause(); state.msTimer = setInterval(() => msStep(+1), cfg.msInterval); }
-    function msPause() { if (state.msTimer) clearInterval(state.msTimer); state.msTimer = null; }
-    function rgbPlay() { rgbPause(); state.rgbTimer = setInterval(() => rgbStep(+1), cfg.rgbInterval); }
-    function rgbPause() { if (state.rgbTimer) clearInterval(state.rgbTimer); state.rgbTimer = null; }
+    // Autoplay
+    function msPlay()      { msPause();      state.msTimer      = setInterval(() => msStep(+1), cfg.msInterval); }
+    function msPause()     { if (state.msTimer) clearInterval(state.msTimer); state.msTimer = null; }
+    function rgbPlay()     { rgbPause();     state.rgbTimer     = setInterval(() => rgbStep(+1), cfg.rgbInterval); }
+    function rgbPause()    { if (state.rgbTimer) clearInterval(state.rgbTimer); state.rgbTimer = null; }
+    function msSrgbPlay()  { msSrgbPause();  state.msSrgbTimer  = setInterval(() => msSrgbStep(+1), cfg.msInterval); }
+    function msSrgbPause() { if (state.msSrgbTimer) clearInterval(state.msSrgbTimer); state.msSrgbTimer = null; }
+    function rgbSrgbPlay() { rgbSrgbPause(); state.rgbSrgbTimer = setInterval(() => rgbSrgbStep(+1), cfg.rgbInterval); }
+    function rgbSrgbPause(){ if (state.rgbSrgbTimer) clearInterval(state.rgbSrgbTimer); state.rgbSrgbTimer = null; }
 
     function buildSelector() {
       if (!selector) return;
@@ -812,14 +870,20 @@
         btnEl.type = 'button';
         btnEl.className = 'button is-small is-light';
         btnEl.dataset.scene = sc.id;
-        btnEl.style.margin = '.25rem'; btnEl.style.padding = '0';
-        btnEl.style.borderRadius = '5%'; btnEl.style.overflow = 'hidden';
-        btnEl.style.width = '120px'; btnEl.style.height = '70px';
+        btnEl.style.margin = '.25rem';
+        btnEl.style.padding = '0';
+        btnEl.style.borderRadius = '5%';
+        btnEl.style.overflow = 'hidden';
+        btnEl.style.width = '120px';
+        btnEl.style.height = '70px';
 
         const img = new Image();
-        img.src = path(sc.id, cfg.files.thumb);
-        img.alt = sc.label; img.loading = 'lazy';
-        img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
+        img.src = path(sc.id, F.thumb);
+        img.alt = sc.label;
+        img.loading = 'lazy';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
         img.style.borderRadius = '5%';
 
         btnEl.appendChild(img);
@@ -828,7 +892,7 @@
       });
     }
 
-    // wire controls
+    // Wire controls
     btn.msPrev?.addEventListener('click', () => msStep(-1));
     btn.msNext?.addEventListener('click', () => msStep(+1));
     btn.msPlay?.addEventListener('click', msPlay);
@@ -839,20 +903,37 @@
     btn.rgbPlay?.addEventListener('click', rgbPlay);
     btn.rgbPause?.addEventListener('click', rgbPause);
 
-    // init
+    btn.msSrgbPrev?.addEventListener('click', () => msSrgbStep(-1));
+    btn.msSrgbNext?.addEventListener('click', () => msSrgbStep(+1));
+    btn.msSrgbPlay?.addEventListener('click', msSrgbPlay);
+    btn.msSrgbPause?.addEventListener('click', msSrgbPause);
+
+    btn.rgbSrgbPrev?.addEventListener('click', () => rgbSrgbStep(-1));
+    btn.rgbSrgbNext?.addEventListener('click', () => rgbSrgbStep(+1));
+    btn.rgbSrgbPlay?.addEventListener('click', rgbSrgbPlay);
+    btn.rgbSrgbPause?.addEventListener('click', rgbSrgbPause);
+
+    // Init
     buildSelector();
     setScene(state.scene);
+
+    // Autoplay channels
     msPlay();
     rgbPlay();
+    // Autoplay sRGB loops only if present
+    if (el.msSRGB && el.msSrgbIdx) msSrgbPlay();
+    if (el.rgbSRGB && el.rgbSrgbIdx) rgbSrgbPlay();
 
     const api = {
       setScene, msPlay, msPause, rgbPlay, rgbPause,
       nextMs: () => msStep(+1), prevMs: () => msStep(-1),
       nextRgb: () => rgbStep(+1), prevRgb: () => rgbStep(-1),
+      msSrgbPlay, msSrgbPause, rgbSrgbPlay, rgbSrgbPause,
+      nextMsSrgb: () => msSrgbStep(+1), prevMsSrgb: () => msSrgbStep(-1),
+      nextRgbSrgb: () => rgbSrgbStep(+1), prevRgbSrgb: () => rgbSrgbStep(-1),
       state, config: cfg
     };
 
-    // let listeners auto-bind (e.g., dark-room)                      // FIX: ready event
     document.dispatchEvent(new CustomEvent('dataset:viewer-ready', { detail: { instance: api } }));
     return api;
   }
@@ -954,178 +1035,178 @@
 /* ============================================================
    Dark-Room Illumination Sweep  (labels + tuned glow colors)
    ============================================================ */
-(function () {
-  function slashSafe(s){ return s.endsWith('/') ? s.slice(0,-1) : s; }
+// (function () {
+//   function slashSafe(s){ return s.endsWith('/') ? s.slice(0,-1) : s; }
 
-  function initDarkroom(opts){
-    const cfg = Object.assign({
-      base: 'assets/dataset',
-      illumPattern: 'i{n}.webp',     // i1..i7.webp
-      msDark: 'ms_channel_00.webp',  // dark transition image
-      rgbSRGB: 'rgb_srgb.webp',      // D65 image
-      litMs: 3800,
-      darkMs: 900,
-      // Lights in order: Violet, Royal Blue, Blue, Green, Yellow, Amber, Deep Red
-      lightLabels: ['Violet','Royal Blue','Blue','Green','Yellow','Amber','Deep Red'],
-      glows: ['#3B06FB','#3462EB','#1E90FF','#2ECC71','#E7D47D','#FF8F00','#C81D25'],
-      glowD65: '#FFFFFF'
-    }, opts || {});
+//   function initDarkroom(opts){
+//     const cfg = Object.assign({
+//       base: 'assets/dataset',
+//       illumPattern: 'i{n}.webp',     // i1..i7.webp
+//       msDark: 'ms_channel_00.webp',  // dark transition image
+//       rgbSRGB: 'rgb_srgb.webp',      // D65 image
+//       litMs: 3800,
+//       darkMs: 900,
+//       // Lights in order: Violet, Royal Blue, Blue, Green, Yellow, Amber, Deep Red
+//       lightLabels: ['Violet','Royal Blue','Blue','Green','Yellow','Amber','Deep Red'],
+//       glows: ['#3B06FB','#3462EB','#1E90FF','#2ECC71','#E7D47D','#FF8F00','#C81D25'],
+//       glowD65: '#FFFFFF'
+//     }, opts || {});
 
-    // elements
-    const stage   = document.querySelector('#ds-darkroom-stage');
-    const a       = document.querySelector('#ds-dark-a');
-    const b       = document.querySelector('#ds-dark-b');
-    const btnPrev = document.querySelector('#ds-dark-prev');
-    const btnNext = document.querySelector('#ds-dark-next');
-    const btnPlay = document.querySelector('#ds-dark-play');
-    const btnPause= document.querySelector('#ds-dark-pause');
-    const indicator = document.querySelector('#ds-dark-indicator');
-    if (!stage || !a || !b) return null;
+//     // elements
+//     const stage   = document.querySelector('#ds-darkroom-stage');
+//     const a       = document.querySelector('#ds-dark-a');
+//     const b       = document.querySelector('#ds-dark-b');
+//     const btnPrev = document.querySelector('#ds-dark-prev');
+//     const btnNext = document.querySelector('#ds-dark-next');
+//     const btnPlay = document.querySelector('#ds-dark-play');
+//     const btnPause= document.querySelector('#ds-dark-pause');
+//     const indicator = document.querySelector('#ds-dark-indicator');
+//     if (!stage || !a || !b) return null;
 
-    // state
-    let scene = 's1';
-    let showingA = true;   // which <img> is visible
-    let litIndex = 0;      // 0..7 (i1..i7, then D65)
-    let phase = 'dark';    // 'dark' | 'lit'
-    let timer = null;
+//     // state
+//     let scene = 's1';
+//     let showingA = true;   // which <img> is visible
+//     let litIndex = 0;      // 0..7 (i1..i7, then D65)
+//     let phase = 'dark';    // 'dark' | 'lit'
+//     let timer = null;
 
-    // helpers
-    const baseScenePath = id => `${slashSafe(cfg.base)}/${id}`;
-    const srcIllum = (id,k) => k < 7
-      ? `${baseScenePath(id)}/${cfg.illumPattern.replace('{n}', String(k+1))}`
-      : `${baseScenePath(id)}/${cfg.rgbSRGB}`;
-    const srcDark  = id => `${baseScenePath(id)}/${cfg.msDark}`;
-    const glowFor  = k => (k < 7 ? cfg.glows[k] : cfg.glowD65);
-    const labelFor = k => (k < 7 ? cfg.lightLabels[k] : 'D65');
+//     // helpers
+//     const baseScenePath = id => `${slashSafe(cfg.base)}/${id}`;
+//     const srcIllum = (id,k) => k < 7
+//       ? `${baseScenePath(id)}/${cfg.illumPattern.replace('{n}', String(k+1))}`
+//       : `${baseScenePath(id)}/${cfg.rgbSRGB}`;
+//     const srcDark  = id => `${baseScenePath(id)}/${cfg.msDark}`;
+//     const glowFor  = k => (k < 7 ? cfg.glows[k] : cfg.glowD65);
+//     const labelFor = k => (k < 7 ? cfg.lightLabels[k] : 'D65');
 
-    function swap(url, {lit=false, idx=null}={}){
-      const cur = showingA ? a : b;
-      const nxt = showingA ? b : a;
+//     function swap(url, {lit=false, idx=null}={}){
+//       const cur = showingA ? a : b;
+//       const nxt = showingA ? b : a;
 
-      nxt.onload = () => {
-        nxt.classList.toggle('is-lit', !!lit);
-        stage.style.setProperty('--glow', lit ? glowFor(idx ?? 0) : '#000');
-        nxt.classList.add('is-active');
-        cur.classList.remove('is-active');
-        showingA = !showingA;
-        nxt.onload = null;
-      };
-      nxt.src = url;
+//       nxt.onload = () => {
+//         nxt.classList.toggle('is-lit', !!lit);
+//         stage.style.setProperty('--glow', lit ? glowFor(idx ?? 0) : '#000');
+//         nxt.classList.add('is-active');
+//         cur.classList.remove('is-active');
+//         showingA = !showingA;
+//         nxt.onload = null;
+//       };
+//       nxt.src = url;
 
-      // Update label ONLY on lit frames (keep previous during dark)
-      if (indicator && lit && idx != null) {
-        indicator.textContent = `${labelFor(idx)} (${idx+1} / 8)`;
-      }
-    }
+//       // Update label ONLY on lit frames (keep previous during dark)
+//       if (indicator && lit && idx != null) {
+//         indicator.textContent = `${labelFor(idx)} (${idx+1} / 8)`;
+//       }
+//     }
 
-    function schedule(ms){ timer = setTimeout(step, ms); }
-    function step(){
-      if (phase === 'dark'){
-        swap(srcIllum(scene, litIndex), {lit:true, idx:litIndex});
-        phase = 'lit';
-        schedule(cfg.litMs);
-      } else {
-        litIndex = (litIndex + 1) % 8;
-        swap(srcDark(scene), {lit:false});
-        phase = 'dark';
-        schedule(cfg.darkMs);
-      }
-    }
+//     function schedule(ms){ timer = setTimeout(step, ms); }
+//     function step(){
+//       if (phase === 'dark'){
+//         swap(srcIllum(scene, litIndex), {lit:true, idx:litIndex});
+//         phase = 'lit';
+//         schedule(cfg.litMs);
+//       } else {
+//         litIndex = (litIndex + 1) % 8;
+//         swap(srcDark(scene), {lit:false});
+//         phase = 'dark';
+//         schedule(cfg.darkMs);
+//       }
+//     }
 
-    function play(){ pause(); step(); }
-    function pause(){ if (timer) clearTimeout(timer); timer = null; }
-    function isPlaying(){ return !!timer; }
+//     function play(){ pause(); step(); }
+//     function pause(){ if (timer) clearTimeout(timer); timer = null; }
+//     function isPlaying(){ return !!timer; }
 
-    function resetForScene(id){
-      scene = id;
-      pause();
-      showingA = true; litIndex = 0; phase = 'dark';
-      swap(srcDark(scene), {lit:false});                  // show dark frame
-      if (indicator) indicator.textContent = `${labelFor(0)} (1 / 8)`; // seed label
-    }
+//     function resetForScene(id){
+//       scene = id;
+//       pause();
+//       showingA = true; litIndex = 0; phase = 'dark';
+//       swap(srcDark(scene), {lit:false});                  // show dark frame
+//       if (indicator) indicator.textContent = `${labelFor(0)} (1 / 8)`; // seed label
+//     }
 
-    // controls
-    btnPrev?.addEventListener('click', () => {
-      pause(); phase='dark';
-      litIndex = (litIndex + 7) % 8; // previous lit frame
-      swap(srcIllum(scene, litIndex), {lit:true, idx:litIndex});
-    });
-    btnNext?.addEventListener('click', () => {
-      pause(); phase='dark';
-      litIndex = (litIndex + 1) % 8; // next lit frame
-      swap(srcIllum(scene, litIndex), {lit:true, idx:litIndex});
-    });
-    btnPlay?.addEventListener('click', play);
-    btnPause?.addEventListener('click', pause);
+//     // controls
+//     btnPrev?.addEventListener('click', () => {
+//       pause(); phase='dark';
+//       litIndex = (litIndex + 7) % 8; // previous lit frame
+//       swap(srcIllum(scene, litIndex), {lit:true, idx:litIndex});
+//     });
+//     btnNext?.addEventListener('click', () => {
+//       pause(); phase='dark';
+//       litIndex = (litIndex + 1) % 8; // next lit frame
+//       swap(srcIllum(scene, litIndex), {lit:true, idx:litIndex});
+//     });
+//     btnPlay?.addEventListener('click', play);
+//     btnPause?.addEventListener('click', pause);
 
-    // keyboard like Scenes Overview: ←/→ and Space
-    document.addEventListener('keydown', (e) => {
-      const tag = (document.activeElement?.tagName || '').toLowerCase();
-      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
-      if (!stage.isConnected) return;
-      if (e.key === 'ArrowLeft')  { e.preventDefault(); btnPrev?.click(); }
-      if (e.key === 'ArrowRight') { e.preventDefault(); btnNext?.click(); }
-      if (e.key === ' ')          { e.preventDefault(); (isPlaying() ? pause() : play()); }
-    });
+//     // keyboard like Scenes Overview: ←/→ and Space
+//     document.addEventListener('keydown', (e) => {
+//       const tag = (document.activeElement?.tagName || '').toLowerCase();
+//       if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+//       if (!stage.isConnected) return;
+//       if (e.key === 'ArrowLeft')  { e.preventDefault(); btnPrev?.click(); }
+//       if (e.key === 'ArrowRight') { e.preventDefault(); btnNext?.click(); }
+//       if (e.key === ' ')          { e.preventDefault(); (isPlaying() ? pause() : play()); }
+//     });
 
-    // stay in sync with dataset viewer (via event)
-    document.addEventListener('dataset:scenechange', (e) => {
-      const id = e.detail?.sceneId;
-      if (!id) return;
-      const was = isPlaying();
-      resetForScene(id);
-      if (was) play();
-    });
+//     // stay in sync with dataset viewer (via event)
+//     document.addEventListener('dataset:scenechange', (e) => {
+//       const id = e.detail?.sceneId;
+//       if (!id) return;
+//       const was = isPlaying();
+//       resetForScene(id);
+//       if (was) play();
+//     });
 
-    // init (no autoplay here; we start it when viewer is ready)
-    resetForScene(scene);
-    return { resetForScene, play, pause, isPlaying, config: cfg };
-  }
+//     // init (no autoplay here; we start it when viewer is ready)
+//     resetForScene(scene);
+//     return { resetForScene, play, pause, isPlaying, config: cfg };
+//   }
 
-  // Auto-init when dataset viewer is ready (and start autoplay)
-  document.addEventListener('dataset:viewer-ready', (e) => {
-    const ds = e.detail?.instance;
-    if (!ds) return;
-    const dr = initDarkroom({
-      base: ds.config?.base || 'assets/dataset',
-      rgbSRGB: ds.config?.files?.rgbSRGB || 'rgb_srgb.webp'
-    });
-    if (dr) dr.play();   // autoplay
-  });
+//   // Auto-init when dataset viewer is ready (and start autoplay)
+//   document.addEventListener('dataset:viewer-ready', (e) => {
+//     const ds = e.detail?.instance;
+//     if (!ds) return;
+//     const dr = initDarkroom({
+//       base: ds.config?.base || 'assets/dataset',
+//       rgbSRGB: ds.config?.files?.rgbSRGB || 'rgb_srgb.webp'
+//     });
+//     if (dr) dr.play();   // autoplay
+//   });
 
-  // Optional manual binder
-  window.__bindDarkroomToDataset = function(ds){
-    if (!ds) return;
-    const dr = initDarkroom({
-      base: ds.config?.base || 'assets/dataset',
-      rgbSRGB: ds.config?.files?.rgbSRGB || 'rgb_srgb.webp'
-    });
-    if (!dr) return;
-    dr.play(); // autoplay
+//   // Optional manual binder
+//   window.__bindDarkroomToDataset = function(ds){
+//     if (!ds) return;
+//     const dr = initDarkroom({
+//       base: ds.config?.base || 'assets/dataset',
+//       rgbSRGB: ds.config?.files?.rgbSRGB || 'rgb_srgb.webp'
+//     });
+//     if (!dr) return;
+//     dr.play(); // autoplay
 
-    if (typeof ds.setScene === 'function'){
-      const original = ds.setScene.bind(ds);
-      ds.setScene = function(sceneId){
-        const playing = dr.isPlaying();
-        original(sceneId);
-        dr.resetForScene(sceneId);
-        if (playing) dr.play(); else dr.pause();
-      };
-    }
-  };
-})();
+//     if (typeof ds.setScene === 'function'){
+//       const original = ds.setScene.bind(ds);
+//       ds.setScene = function(sceneId){
+//         const playing = dr.isPlaying();
+//         original(sceneId);
+//         dr.resetForScene(sceneId);
+//         if (playing) dr.play(); else dr.pause();
+//       };
+//     }
+//   };
+// })();
 
-// Copy-to-clipboard for BibTeX
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-copy-bib]');
-  if (!btn) return;
-  const target = document.querySelector(btn.getAttribute('data-target'));
-  const text = target ? target.innerText.trim() : '';
-  if (!text) return;
+// // Copy-to-clipboard for BibTeX
+// document.addEventListener('click', (e) => {
+//   const btn = e.target.closest('[data-copy-bib]');
+//   if (!btn) return;
+//   const target = document.querySelector(btn.getAttribute('data-target'));
+//   const text = target ? target.innerText.trim() : '';
+//   if (!text) return;
 
-  navigator.clipboard.writeText(text).then(() => {
-    const old = btn.textContent;
-    btn.textContent = 'Copied!';
-    setTimeout(() => (btn.textContent = old), 1200);
-  });
-});
+//   navigator.clipboard.writeText(text).then(() => {
+//     const old = btn.textContent;
+//     btn.textContent = 'Copied!';
+//     setTimeout(() => (btn.textContent = old), 1200);
+//   });
+// });

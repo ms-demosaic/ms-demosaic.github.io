@@ -293,7 +293,7 @@ body {
 #dataset-viewer .ds-btn { border:1px solid #cbd5e1; background:#fff; border-radius:8px; padding:.25rem .45rem; cursor:pointer; }
 #dataset-viewer .ds-btn:hover { background:#f1f5f9; }
 #dataset-viewer .ds-pill { background:#e2e8f0; border-radius:999px; padding:2px 8px; font-size:.8rem; }
-
+#dataset-viewer .ds-figcaption { font-size:.8rem; font-weight:500; color:#111; }
 /* controls styling (reuses Scenes Overview styles if you already have them) */
 #dataset-viewer .so-controls { display:flex; gap:.35rem; align-items:center; }
 #dataset-viewer .so-btn {

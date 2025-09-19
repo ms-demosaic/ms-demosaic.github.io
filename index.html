@@ -567,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <br/>
       <h2 class="title">Dataset Visualization</h2>
       <p class="content">
-        Explore sample scenes with multispectral (MS) and RGB data. Left panels cycle through channels (MS×16, RGB×3) with play/pause and step controls; middle panels show mosaics; right panels show sRGB visualizations.
+        Explore sample scenes that include both multispectral (MS) and RGB data. The left panels cycle through seven LED illuminations plus D65 for both camera positions (with view 1 offset 1 cm to the left of view 2), the middle panels loop through channels (MS x 16 and RGB x 3), and the right panels display the mosaics.
       </p>
 
       <!-- Scene selector -->
@@ -578,10 +578,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <!-- 3×2 grid -->
       <div class="ds-grid">
+
+        <!-- MS: Illumination View 1 -->
+        <figure class="ds-card">
+          <img id="ds-ms-srgb" alt="MS sRGB visualization" loading="lazy">
+          <figcaption class = "ds-figcaption">
+            <strong>Illumination View 1</strong>
+            <span id="ds-ms-srgb-indicator" class="ds-pill">Violet</span>
+            <div class="ds-controls">
+              <button class="ds-btn" id="ds-ms-srgb-prev"  aria-label="Previous MS sRGB">⏮</button>
+              <button class="ds-btn" id="ds-ms-srgb-play"  aria-label="Play MS sRGB">▶</button>
+              <button class="ds-btn" id="ds-ms-srgb-pause" aria-label="Pause MS sRGB">⏸</button>
+              <button class="ds-btn" id="ds-ms-srgb-next"  aria-label="Next MS sRGB">⏭</button>
+            </div>
+          </figcaption>
+        </figure>
         <!-- MS: channels -->
         <figure class="ds-card">
           <img id="ds-ms-channel" alt="MS channel frame" loading="lazy">
-          <figcaption>
+          <figcaption class = "ds-figcaption">
             <strong>MS channels</strong>
             <span id="ds-ms-indicator" class="ds-pill">1 / 16</span>
             <div class="ds-controls">
@@ -596,19 +611,29 @@ document.addEventListener('DOMContentLoaded', () => {
         <!-- MS: mosaic -->
         <figure class="ds-card">
           <img id="ds-ms-mosaic" alt="MS mosaic" loading="lazy">
-          <figcaption><strong>MS mosaic</strong></figcaption>
+          <figcaption class = "ds-figcaption"><strong style="margin-top: 1.5%;">MS mosaic</strong></figcaption>
         </figure>
 
-        <!-- MS: sRGB -->
+
+        <!-- RGB: Illumination View 2 -->
         <figure class="ds-card">
-          <img id="ds-ms-srgb" alt="MS sRGB visualization" loading="lazy">
-          <figcaption><strong>MS sRGB</strong></figcaption>
+          <img id="ds-rgb-srgb" alt="RGB sRGB visualization" loading="lazy">
+          <figcaption class = "ds-figcaption">
+            <strong>Illumination View 2</strong>
+            <span id="ds-rgb-srgb-indicator" class="ds-pill">Violet</span>
+            <div class="ds-controls">
+              <button class="ds-btn is-small" id="ds-rgb-srgb-prev"  aria-label="Previous RGB sRGB">⏮</button>
+              <button class="ds-btn" id="ds-rgb-srgb-play"  aria-label="Play RGB sRGB">▶</button>
+              <button class="ds-btn" id="ds-rgb-srgb-pause" aria-label="Pause RGB sRGB">⏸</button>
+              <button class="ds-btn" id="ds-rgb-srgb-next"  aria-label="Next RGB sRGB">⏭</button>
+            </div>
+          </figcaption>
         </figure>
 
         <!-- RGB: channels -->
         <figure class="ds-card">
           <img id="ds-rgb-channel" alt="RGB channel frame" loading="lazy">
-          <figcaption>
+          <figcaption class = "ds-figcaption">
             <strong>RGB channels</strong>
             <span id="ds-rgb-indicator" class="ds-pill">1 / 3</span>
             <div class="ds-controls">
@@ -623,34 +648,20 @@ document.addEventListener('DOMContentLoaded', () => {
         <!-- RGB: mosaic -->
         <figure class="ds-card">
           <img id="ds-rgb-mosaic" alt="RGB mosaic" loading="lazy">
-          <figcaption><strong>RGB mosaic</strong></figcaption>
+          <figcaption class = "ds-figcaption"><strong style="margin-top: 1.5%;">RGB mosaic</strong></figcaption>
         </figure>
 
-        <!-- RGB: sRGB -->
-        <figure class="ds-card">
-          <img id="ds-rgb-srgb" alt="RGB sRGB visualization" loading="lazy">
-          <figcaption><strong>RGB sRGB</strong></figcaption>
-        </figure>
       </div>
     
 
           <!-- Dark-Room Illumination Sweep -->
-      <div class="card ds-darkroom-card" style="border-radius:1em; overflow:visible; margin-top:1rem;">
+      <!-- <div class="card ds-darkroom-card" style="border-radius:1em; overflow:visible; margin-top:1rem;">
         <h5 style="text-align:center; padding:0.8rem 1rem 0; font-weight: 700;">Illumination Sweep</h5>
 
         <div id="ds-darkroom-stage" class="ds-darkroom-stage">
           <img id="ds-dark-a" class="ds-darkroom-img is-active" alt="">
           <img id="ds-dark-b" class="ds-darkroom-img" alt="">
         </div>
-
-        <!-- <div class="p-3" style="display:flex; align-items:center; justify-content:space-between; gap:.5rem; flex-wrap:wrap;">
-          <div class="so-controls">
-            <button class="so-btn so-btn--step"   id="ds-dark-prev"   aria-label="Previous (←)">⏮</button>
-            <button class="so-btn so-btn--primary so-btn--circle" id="ds-dark-toggle" aria-pressed="true" aria-label="Pause (Space)">⏸</button>
-            <button class="so-btn so-btn--step"   id="ds-dark-next"   aria-label="Next (→)">⏭</button>
-          </div>
-          <span id="ds-dark-indicator" class="so-pill">1 / 8</span>
-        </div> -->
         <div class="p-3" style="display:flex; align-items:center; justify-content:space-between; gap:.5rem; flex-wrap:wrap;">
           <div style="display:flex; gap:.35rem; align-items:center;">
             <button class="button is-light" id="ds-dark-prev"  aria-label="Previous">⏮</button>
@@ -662,7 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 style="background:#e2e8f0;border-radius:999px;padding:2px 10px;font-size:.85rem;">1 / 8</span>
         </div>
 
-      </div>
+      </div> -->
 
     </div>
   </div>
