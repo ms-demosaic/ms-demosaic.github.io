@@ -1114,3 +1114,18 @@
     }
   };
 })();
+
+// Copy-to-clipboard for BibTeX
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-copy-bib]');
+  if (!btn) return;
+  const target = document.querySelector(btn.getAttribute('data-target'));
+  const text = target ? target.innerText.trim() : '';
+  if (!text) return;
+
+  navigator.clipboard.writeText(text).then(() => {
+    const old = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => (btn.textContent = old), 1200);
+  });
+});
