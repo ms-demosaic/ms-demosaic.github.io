@@ -1210,3 +1210,50 @@
 //     setTimeout(() => (btn.textContent = old), 1200);
 //   });
 // });
+// Copy-to-clipboard for the BibTeX block
+(function () {
+  function getBibText(targetSel) {
+    const el = document.querySelector(targetSel);
+    if (!el) return '';
+    const code = el.querySelector('code');
+    const raw = code ? (code.innerText || code.textContent) : (el.innerText || el.textContent);
+    return (raw || '').trim();
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    }
+    // Fallback for non-secure contexts/older browsers
+    return new Promise((resolve) => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand('copy'); } catch (_) {}
+      document.body.removeChild(ta);
+      resolve();
+    });
+  }
+
+  function flash(btn, msg = 'Copied!') {
+    const prev = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = msg;
+    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 1200);
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-copy-bib]');
+    if (!btn) return;
+
+    const targetSel = btn.getAttribute('data-target') || '#bibtex-block';
+    const text = getBibText(targetSel);
+    if (!text) return;
+
+    copyText(text).then(() => flash(btn)).catch(() => flash(btn, 'Copied'));
+  });
+})();
