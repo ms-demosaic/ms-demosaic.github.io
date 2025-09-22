@@ -305,6 +305,29 @@ body {
 #dataset-viewer .so-btn:hover { background:#f1f5f9; }
 #dataset-viewer .so-btn--primary:hover { background:#000; }
 #dataset-viewer .so-pill { background:#e2e8f0; border-radius:999px; padding:2px 10px; font-size:.85rem; }
+/* Fix the sRGB light-label pill to a constant width (≈8 characters) */
+#dataset-viewer #ds-ms-srgb-indicator,
+#dataset-viewer #ds-rgb-srgb-indicator{
+  display: inline-block;
+  width: 8ch;           /* match your longest label length */
+  white-space: nowrap;
+  text-align: center;
+  /* optional: steadier width with monospace */
+  /* font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; */
+}
+
+/* Keep numeric pills from jumping when digits change (optional) */
+#dataset-viewer #ds-ms-indicator,
+#dataset-viewer #ds-rgb-indicator{
+  display: inline-block;
+  width: 7ch;           /* adjust as you like */
+  white-space: nowrap;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ensure the controls don’t shrink and force a wrap */
+#dataset-viewer .ds-controls { flex: 0 0 auto; }
 
 /* dark-room stage */
 #dataset-viewer .ds-darkroom-stage{
