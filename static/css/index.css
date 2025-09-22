@@ -309,7 +309,7 @@ body {
 #dataset-viewer #ds-ms-srgb-indicator,
 #dataset-viewer #ds-rgb-srgb-indicator{
   display: inline-block;
-  width: 8ch;           /* match your longest label length */
+  width: 9ch;           /* match your longest label length */
   white-space: nowrap;
   text-align: center;
   /* optional: steadier width with monospace */
