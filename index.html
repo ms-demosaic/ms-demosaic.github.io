@@ -5,7 +5,7 @@
   <meta name="description" content="Multispectral Demosaicing via DualCameras">
   <meta name="keywords" content="Multispectral, Demosaicing, DualCameras">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Multispectral Demosaicing via DualCameras</title>
+  <title>Multispectral Demosaicing via Dual Cameras</title>
 
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text y=%22.9em%22 font-size=%2290%22&gt;%E2%9C%A8&lt;/text&gt;&lt;/svg&gt;">
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="columns is-centered">
         <div class="column has-text-centered">
           <h1 style="font: 1em;" class="title is-1 publication-title text-muted" >
-            Multispectral Demosaicing via Dual-Cameras
+            Multispectral Demosaicing via Dual Cameras
           </h1>
           <div class="is-size-5 publication-authors">
             <span class="author-block">
@@ -532,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div style='border-radius:1em;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;padding:1em;' class="container is-max-desktop has-text-centered">
     <br/>
       <div class="container is-max-desktop">
-      <h2 class="title">Dual-Camera MS-RGB Capturing & Channel Formation</h2>
+      <h2 class="title">Dual-Camera MS-RGB Capture Setup</h2>
       <p class="content has-text-justified">
         We built a controlled MS-RGB rig that emulates two synchronized cameras with a fixed 1 cm baseline: a Sony Alpha 1 is shuttled between MS and RGB positions on an Arduino-driven linear stage, while a Telelumen OctaLight box provides the only illumination in a darkroom. RGB frames are captured under D65. MS data are simulated by re-illuminating the scene with seven narrow-band spectra and combining captures, yielding 21 responses (7x3 RGB). We then keep the 16 most informative channels (discarding five low-signal/redundant ones) to form the 16-channel MS representation used in our experiments.
       </p>
@@ -567,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <br/>
       <h2 class="title">Dataset Visualization</h2>
       <p class="content">
-        Explore sample scenes that include both multispectral (MS) and RGB data. The left panels cycle through seven LED illuminations plus D65 for both camera positions (with view 1 offset 1 cm to the left of view 2), the middle panels loop through channels (MS x 16 and RGB x 3), and the right panels display the mosaics.
+        Explore sample scenes that include both multispectral (MS) and RGB data. The left panels cycle through seven LED illuminations plus D65 for both camera positions (with a baseline of 1 cm between view 1 and view 2); the middle panels loop through channels (16 MS and 3 RGB); and the right panels display the mosaics.
       </p>
 
       <!-- Scene selector -->
@@ -687,7 +687,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <p class="content">
         We set up 28 scenes featuring colorful, high-frequency materials. Each scene includes
         15-30 different arrangements or camera positions (objects moved, rearranged, added/removed),
-        yielding 490+ distinct views in total. Below we auto-cycle one representative image per scene.
+        yielding 490+ distinct views in total. Below we visualize one representative image per scene.
       </p>
 
       <div class="card" style="border-radius:1em; overflow:hidden; box-shadow: rgba(0,0,0,.08) 0 8px 20px;">
